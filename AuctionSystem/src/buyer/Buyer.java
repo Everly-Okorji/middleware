@@ -1,15 +1,19 @@
 package buyer;
 
-public interface Buyer {
+import java.util.Set;
 
-	void bid();
+public interface Buyer {
 	
-	void interest();
+	long getId();
+
+	int publishBid(long itemId, float price);
 	
-	void receiveBid();
+	int subscribeInterest(String name, Set<String> attributes, float minimumBid);
 	
-	void interestBidUpdate();
+	int subscribeInterestBidUpdate(long itemId);
 	
-	void itemSold();
+	int subscribeItemSold(long itemId);
+	
+	int setAutomaticMode(boolean isAuto);
 	
 }

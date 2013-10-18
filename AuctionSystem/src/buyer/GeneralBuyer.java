@@ -1,39 +1,50 @@
 package buyer;
 
+import java.util.Set;
+
 public class GeneralBuyer implements Buyer {
 
+	long id;
+	
 	public GeneralBuyer() {
 		
 	}
-	
+
 	@Override
-	public void bid() {
+	public int publishBid(long itemId, float price) {
 		// TODO Auto-generated method stub
-		
+		return 0;
 	}
 
 	@Override
-	public void interest() {
+	public int subscribeInterest(String name, Set<String> attributes,
+			float minimumBid) {
 		// TODO Auto-generated method stub
-		
+		return 0;
 	}
 
 	@Override
-	public void receiveBid() {
+	public int subscribeInterestBidUpdate(long itemId) {
 		// TODO Auto-generated method stub
-		
+		return 0;
 	}
 
 	@Override
-	public void interestBidUpdate() {
+	public int subscribeItemSold(long itemId) {
 		// TODO Auto-generated method stub
-		
+		return 0;
 	}
 
 	@Override
-	public void itemSold() {
+	public int setAutomaticMode(boolean isAuto) {
 		// TODO Auto-generated method stub
-		
+		return 0;
+	}
+
+	@Override
+	public long getId() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }
