@@ -44,7 +44,7 @@ public class GeneralBuyer implements Buyer {
 	@Override
 	public long getId() {
 		// TODO Auto-generated method stub
-		return 0;
+		return id;
 	}
 
 }

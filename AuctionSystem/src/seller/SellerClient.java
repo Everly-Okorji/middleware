@@ -23,8 +23,8 @@ public class SellerClient {
     	long lastItemId = 0;
     	
     	// Ask user to enter host name and port number
-    	String hostName = JOptionPane.showInputDialog("Enter hostname: ");
-    	int portNumber = Integer.parseInt(JOptionPane.showInputDialog("Enter port number: "));
+    	String hostName = "localhost";
+    	int portNumber = 4444;
 
     	// Create connection to socket and fetch input and output streams
         try (
@@ -62,7 +62,7 @@ public class SellerClient {
             		// Store data in list
             		items.add(new Item(itemId, name, attr, minimumBid));
             		
-            		fromUser = "Publish Available Item|" + itemId + "|" + name + "|" + attributes + "|" + minimumBid;
+            		fromUser = "A|Publish Available Item|" + itemId + "|" + name + "|" + attributes + "|" + minimumBid;
             		out.println(fromUser);
             		
             		fromServer = in.readLine();
