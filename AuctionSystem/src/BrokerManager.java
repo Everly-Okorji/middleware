@@ -1,11 +1,14 @@
-package broker;
+import javax.swing.JOptionPane;
+
+
 
 public class BrokerManager {
 	
-	static Broker[] brokers;
+	//static Broker[] brokers;
 
 	public static void main(String[] args) {
-		
+/*		
+ * 
 		brokers = new GeneralBroker[6];
 		
 		for (int i = 0; i < brokers.length; i++) {
@@ -22,8 +25,18 @@ public class BrokerManager {
 		
 		// Set children for the broker2
 		brokers[2].setChildBroker(brokers[5].getId());
+		*/
 		
+		String attributeString = JOptionPane.showInputDialog("Enter a set of attributes, separated by commas: ");
+		String[] split = attributeString.split(",");
 		
+		for (String s: split) {
+			System.out.println(s);
+		}
+		String hostName = JOptionPane.showInputDialog("Enter hostname: ");
+    	int portNumber = Integer.parseInt(JOptionPane.showInputDialog("Enter port number: "));
+    	
+		System.out.println(hostName + ":" + portNumber);
 
 	}
 
