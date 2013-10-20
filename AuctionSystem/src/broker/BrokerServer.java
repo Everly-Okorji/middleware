@@ -38,11 +38,11 @@ public class BrokerServer {
 			        String inputLine1, outputLine1;
 			        Broker broker = new GeneralBroker();   
 			        while(true) {
-			        	outputLine1 = in1.readLine();
+			        	inputLine1 = in1.readLine();
 			        	
-			        	if (outputLine1!=null){       	
+			        	if (inputLine1!=null){       	
 			        		
-			        		String[] command = outputLine1.split("|");
+			        		String[] command = inputLine1.split("#");
 			        		switch (command[0].charAt(0)){
 			        		case 'A':
 			        			//Publish Available Item
@@ -143,11 +143,11 @@ public class BrokerServer {
 			        String inputLine1, outputLine1;
 			        Broker broker = new GeneralBroker();   
 			        while(true) {
-			        	outputLine1 = in1.readLine();
+			        	inputLine1 = in1.readLine();
 			        	
-			        	if (outputLine1!=null){       	
+			        	if (inputLine1!=null){       	
 			        		
-			        		String[] command = outputLine1.split("|");
+			        		String[] command = inputLine1.split("|");
 			        		switch (command[0].charAt(0)){
 			        		case 'A':
 			        			//Publish Available Item
