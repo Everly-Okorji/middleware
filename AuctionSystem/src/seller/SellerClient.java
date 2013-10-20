@@ -42,7 +42,7 @@ public class SellerClient {
         		close(out, in, sellerSocket, 0);
         	}
         	else if (result == JOptionPane.YES_OPTION) {
-        		String msg = "Y|Seller";
+        		String msg = "Y#Seller";
         		out.println(msg);
         		userId = Integer.parseInt(in.readLine());
         		JOptionPane.showMessageDialog(null, "Your ID is: " + userId);
@@ -83,7 +83,7 @@ public class SellerClient {
             		// Store data in list
             		items.add(new Item(itemId, name, attr, minimumBid));
             		
-            		fromUser = "A|Publish Available Item|Seller" + userId + "|" + itemId + "|" + name + "|" + attributes + "|" + minimumBid;
+            		fromUser = "A#Publish Available Item#Seller" + userId + "#" + itemId + "#" + name + "#" + attributes + "#" + minimumBid;
             		out.println(fromUser);
             		
             		fromServer = in.readLine();
@@ -127,7 +127,7 @@ public class SellerClient {
     public static void close(PrintWriter out, BufferedReader in, Socket sellerSocket, int code) {
     	
     	// Tell server to close connection
-    	String fromUser = "Z|Quit";
+    	String fromUser = "Z#Quit";
     	out.println(fromUser);
     	
     	// Close IO handles

@@ -6,8 +6,10 @@ public class GeneralBroker implements Broker {
 
 	long id;
 	
+	private int lastId;
+	
 	GeneralBroker() {
-		
+		lastId = 0;
 	}
 
 	public long getId() {
@@ -80,8 +82,7 @@ public class GeneralBroker implements Broker {
 
 	@Override
 	public String genSellerId() {
-		// TODO Auto-generated method stub
-		return null;
+		return lastId++ + "";
 	}
 
 	@Override

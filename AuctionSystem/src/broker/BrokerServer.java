@@ -43,7 +43,7 @@ public class BrokerServer {
 			        	
 			        	if (inputLine!=null){       	
 			        		
-			        		String[] command = inputLine.split("|");
+			        		String[] command = inputLine.split("#");
 			        		switch (command[0].charAt(0)){
 			        		case 'A':
 			        			
