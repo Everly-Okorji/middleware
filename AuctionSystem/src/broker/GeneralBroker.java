@@ -13,10 +13,11 @@ public class GeneralBroker implements Broker {
 	public long getId() {
 		return id;
 	}
-	
+
+
 	@Override
 	public int publishAvailableItem(long sellerId, long itemId, String name,
-			Set<String> attributes, float minimumBid) {
+			String attributes, float minimumBid) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
@@ -73,6 +74,18 @@ public class GeneralBroker implements Broker {
 
 	@Override
 	public Broker getParent() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String genSellerId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String genBuyerId() {
 		// TODO Auto-generated method stub
 		return null;
 	}

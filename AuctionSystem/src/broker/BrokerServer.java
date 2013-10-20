@@ -47,11 +47,22 @@ public class BrokerServer {
 			        		switch (command[0].charAt(0)){
 			        		case 'A':
 			        			
-			        			outputLine = broker.publishAvailableItem(sellerId, command[2], command[3], command[4], command[5]);
+			        			outputLine = "" + broker.publishAvailableItem(Long.parseLong(command[2]), Long.parseLong(command[3]), command[4], command[5],Float.parseFloat(command[6]));
 			        			out1.println(outputLine);
 			        			
 			        			break;
+			        			
+			        		case 'Y':
+			        			//Generate ID for new Seller/Buyer
+			        			if ("Seller".equals(command[1])){
+			        				out1.println(broker.genSellerId());
+			        			}
+			        			else{
+			        				out1.println(broker.genBuyerId());
+			        			}
+			        			break;
 			        		case 'Z':
+			        			//The client's session is out
 			        			out1.close();
 			    		        in1.close();
 			    		        clientSocket1.close();

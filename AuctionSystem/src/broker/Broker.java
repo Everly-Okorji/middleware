@@ -6,7 +6,7 @@ public interface Broker {
 	
 	long getId();
 	
-	int publishAvailableItem(long sellerId, long itemId, String name, Set<String> attributes, float minimumBid);
+	int publishAvailableItem(long sellerId, long itemId, String name, String attributes, float minimumBid);
 
 	int publishBid(long buyerId, long itemId, float price);
 	
@@ -25,5 +25,9 @@ public interface Broker {
 	int setChildBroker(long brokerId);
 	
 	Broker getParent();
+
+	String genSellerId();
+
+	String genBuyerId();
 	
 }
