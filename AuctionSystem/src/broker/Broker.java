@@ -14,7 +14,7 @@ public interface Broker {
 	
 	int publishFinalizeSale(long sellerId, long itemId, float finalPrice, long buyerId);
 	
-	int subscribeInterest(long buyerId, String name, Set<String> attributes, float minimumBid);
+	int subscribeInterest(long buyerId, String name, String attributes, float minimumBid);
 	
 	int subscribeReceiveBid(long sellerId, long itemId);
 	

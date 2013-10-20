@@ -1,24 +1,32 @@
 package broker;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class GeneralBroker implements Broker {
 
 	long id;
-	
+	List<Item> itemsHolds = new ArrayList<Item>();
+
 	GeneralBroker() {
-		
+
 	}
 
 	public long getId() {
 		return id;
 	}
 
-
 	@Override
 	public int publishAvailableItem(long sellerId, long itemId, String name,
 			String attributes, float minimumBid) {
-		// TODO Auto-generated method stub
+		
+		Set<String> attr= new HashSet<String>(
+				Arrays.asList(attributes.split(",")));
+		
+		itemsHolds.add(new Item(sellerId, itemId, name, attr, minimumBid));
 		return 0;
 	}
 
@@ -42,8 +50,8 @@ public class GeneralBroker implements Broker {
 	}
 
 	@Override
-	public int subscribeInterest(long buyerId, String name,
-			Set<String> attributes, float minimumBid) {
+	public int subscribeInterest(long buyerId, String name, String attributes,
+			float minimumBid) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
@@ -89,5 +97,5 @@ public class GeneralBroker implements Broker {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 }
