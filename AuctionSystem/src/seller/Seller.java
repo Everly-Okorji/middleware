@@ -6,6 +6,8 @@ public interface Seller {
 
 	long getId();
 	
+	long genItemId();
+	
 	int publishAvailableItem(long itemId, String name, Set<String> attributes, float minimumBid);
 	
 	int publishBidUpdate(long itemId);

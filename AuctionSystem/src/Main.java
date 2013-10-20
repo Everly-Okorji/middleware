@@ -1,6 +1,5 @@
-import java.io.IOException;
-
 import seller.SellerClient;
+import buyer.BuyerClient;
 import broker.BrokerServer;
 
 

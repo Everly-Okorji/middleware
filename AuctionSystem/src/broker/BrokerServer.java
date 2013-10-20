@@ -46,42 +46,46 @@ public class BrokerServer {
 			        		switch (command[0].charAt(0)){
 			        		case 'A':
 			        			//Publish Available Item
-			           			outputLine1 = "" + broker.publishAvailableItem(Long.parseLong(command[2]), Long.parseLong(command[3]), command[4], command[5],Float.parseFloat(command[6]));
+			           			outputLine1 = "" + broker.publishAvailableItem(Long.parseLong(command[2].substring(6)), Long.parseLong(command[3]), command[4], command[5],Float.parseFloat(command[6]));
 			        			out1.println(outputLine1);   			
 			        			break;
 			        		case 'B': 
 			        			//Publish Bid Update
-			        			outputLine1 = "" + broker.publishBidUpdate(Long.parseLong(command[2]), Long.parseLong(command[3]));
+			        			outputLine1 = "" + broker.publishBidUpdate(Long.parseLong(command[2].substring(6)), Long.parseLong(command[3]));
 			        			out1.println(outputLine1);
 			        			break;
 			        		case 'C':
 			        			//Publish Finalize Sale
-			        			outputLine1 = "" + broker.publishFinalizeSale(Long.parseLong(command[2]), Long.parseLong(command[3]),Float.parseFloat(command[4]),Long.parseLong(command[5]));
+			        			outputLine1 = "" + broker.publishFinalizeSale(Long.parseLong(command[2].substring(6)), Long.parseLong(command[3]),Float.parseFloat(command[4]),Long.parseLong(command[5]));
 			        			out1.println(outputLine1);
 			        			break;
 			        		case 'D':
 			        			//Subscribe Receive Bid
-			        			outputLine1 = "" + broker.subscribeReceiveBid(Long.parseLong(command[2]), Long.parseLong(command[3]));
+			        			outputLine1 = "" + broker.subscribeReceiveBid(Long.parseLong(command[2].substring(6)), Long.parseLong(command[3]));
 			        			out1.println(outputLine1);
 			        			break;
 			        		case 'E':
+			        			// TODO
+			        			// Look for seller with item and relay message
+			        			// Return code for success or failure
 			        			//Publish Bid
-			        			outputLine1 = "" + broker.publishBid(Long.parseLong(command[2]), Long.parseLong(command[3]),Float.parseFloat(command[4]));
-			        			out1.println(outputLine1);
+//			        			outputLine1 = "" + broker.publishBid(Long.parseLong(command[2].substring(5)), Long.parseLong(command[3]),Float.parseFloat(command[4]));
+//			        			out1.println(outputLine1);
+			        			
 			        			break;
 			        		case 'F':
 			        			//Subscribe Interest
-			        			outputLine1 = "" + broker.subscribeInterest(Long.parseLong(command[2]), command[3], command[4],Float.parseFloat(command[5]));
+			        			outputLine1 = "" + broker.subscribeInterest(Long.parseLong(command[2].substring(5)), command[3], command[4],Float.parseFloat(command[5]));
 			        			out1.println(outputLine1);
 			        			break;
 			        		case 'G':
 			        			//Subscribe Interest Bid Update
-			        			outputLine1 = "" + broker.subscribeInterestBidUpdate(Long.parseLong(command[2]), Long.parseLong(command[3]));
+			        			outputLine1 = "" + broker.subscribeInterestBidUpdate(Long.parseLong(command[2].substring(5)), Long.parseLong(command[3]));
 			        			out1.println(outputLine1);
 			        			break;
 			        		case 'H':
 			        			//Subscribe Item Sold
-			        			outputLine1 = "" + broker.subscribeItemSold(Long.parseLong(command[2]), Long.parseLong(command[3]));
+			        			outputLine1 = "" + broker.subscribeItemSold(Long.parseLong(command[2].substring(5)), Long.parseLong(command[3]));
 			        			out1.println(outputLine1);
 			        			break;
 			        		case 'Y':
@@ -147,46 +151,46 @@ public class BrokerServer {
 			        	
 			        	if (inputLine1!=null){       	
 			        		
-			        		String[] command = inputLine1.split("|");
+			        		String[] command = inputLine1.split("#");
 			        		switch (command[0].charAt(0)){
 			        		case 'A':
 			        			//Publish Available Item
-			           			outputLine1 = "" + broker.publishAvailableItem(Long.parseLong(command[2]), Long.parseLong(command[3]), command[4], command[5],Float.parseFloat(command[6]));
+			           			outputLine1 = "" + broker.publishAvailableItem(Long.parseLong(command[2].substring(6)), Long.parseLong(command[3]), command[4], command[5],Float.parseFloat(command[6]));
 			        			out1.println(outputLine1);   			
 			        			break;
 			        		case 'B':
 			        			//Publish Bid Update
-			        			outputLine1 = "" + broker.publishBidUpdate(Long.parseLong(command[2]), Long.parseLong(command[3]));
+			        			outputLine1 = "" + broker.publishBidUpdate(Long.parseLong(command[2].substring(6)), Long.parseLong(command[3]));
 			        			out1.println(outputLine1);
 			        			break;
 			        		case 'C':
 			        			//Publish Finalize Sale
-			        			outputLine1 = "" + broker.publishFinalizeSale(Long.parseLong(command[2]), Long.parseLong(command[3]),Float.parseFloat(command[4]),Long.parseLong(command[5]));
+			        			outputLine1 = "" + broker.publishFinalizeSale(Long.parseLong(command[2].substring(6)), Long.parseLong(command[3]),Float.parseFloat(command[4]),Long.parseLong(command[5]));
 			        			out1.println(outputLine1);
 			        			break;
 			        		case 'D':
 			        			//Subscribe Receive Bid
-			        			outputLine1 = "" + broker.subscribeReceiveBid(Long.parseLong(command[2]), Long.parseLong(command[3]));
+			        			outputLine1 = "" + broker.subscribeReceiveBid(Long.parseLong(command[2].substring(6)), Long.parseLong(command[3]));
 			        			out1.println(outputLine1);
 			        			break;
 			        		case 'E':
 			        			//Publish Bid
-			        			outputLine1 = "" + broker.publishBid(Long.parseLong(command[2]), Long.parseLong(command[3]),Float.parseFloat(command[4]));
+			        			outputLine1 = "" + broker.publishBid(Long.parseLong(command[2].substring(5)), Long.parseLong(command[3]),Float.parseFloat(command[4]));
 			        			out1.println(outputLine1);
 			        			break;
 			        		case 'F':
 			        			//Subscribe Interest
-			        			outputLine1 = "" + broker.subscribeInterest(Long.parseLong(command[2]), command[3], command[4],Float.parseFloat(command[5]));
+			        			outputLine1 = "" + broker.subscribeInterest(Long.parseLong(command[2].substring(5)), command[3], command[4],Float.parseFloat(command[5]));
 			        			out1.println(outputLine1);
 			        			break;
 			        		case 'G':
 			        			//Subscribe Interest Bid Update
-			        			outputLine1 = "" + broker.subscribeInterestBidUpdate(Long.parseLong(command[2]), Long.parseLong(command[3]));
+			        			outputLine1 = "" + broker.subscribeInterestBidUpdate(Long.parseLong(command[2].substring(5)), Long.parseLong(command[3]));
 			        			out1.println(outputLine1);
 			        			break;
 			        		case 'H':
 			        			//Subscribe Item Sold
-			        			outputLine1 = "" + broker.subscribeItemSold(Long.parseLong(command[2]), Long.parseLong(command[3]));
+			        			outputLine1 = "" + broker.subscribeItemSold(Long.parseLong(command[2].substring(5)), Long.parseLong(command[3]));
 			        			out1.println(outputLine1);
 			        			break;
 			        		case 'Y':

@@ -6,6 +6,8 @@ public interface Buyer {
 	
 	long getId();
 	
+	long genItemId();
+	
 	int setAutomaticMode(boolean isAuto);
 
 	int publishBid(long itemId, float price);

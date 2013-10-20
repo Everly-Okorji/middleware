@@ -87,7 +87,7 @@ public class BuyerClient {
 					// command: Publish Bid
 					itemId = new Long(JOptionPane.showInputDialog("Enter Item ID:"));
 					price = new Double (JOptionPane.showInputDialog("Enter price: $"));
-					fromUser = "E#Buyer" + userId + "#" + itemId + "#" + price;
+					fromUser = "E#Publish Bid#Buyer" + userId + "#" + itemId + "#" + price;
 					status = send(fromUser, out, in);
 					break;
 					
@@ -106,20 +106,20 @@ public class BuyerClient {
 					// Store data in list
 					items.add(new Item(itemId, name, attr, minimumBid));
 					
-					fromUser = "F#Buyer" + userId + "#" + name + "#" + attributes + "#" + minimumBid;
+					fromUser = "F#Subscribe Interest#Buyer" + userId + "#" + name + "#" + attributes + "#" + minimumBid;
 					status = send(fromUser, out, in);
 					break;
 					
 				case 2:
 					// command: Subscribe Interest Bid Update
 					itemId = new Long(JOptionPane.showInputDialog("Enter Item ID:"));
-					fromUser = "G#Buyer" + userId + "#" + itemId;
+					fromUser = "G#Subscribe Interest Bid Update#Buyer" + userId + "#" + itemId;
 					status = send(fromUser, out, in);
 					break;
 				case 3:
 					// command: Subscribe Item Sold
 					itemId = new Long(JOptionPane.showInputDialog("Enter Item ID:"));
-					fromUser = "H#Buyer" + userId + "#" + itemId;
+					fromUser = "H#Subscribe Item Sold#Buyer" + userId + "#" + itemId;
 					status = send(fromUser, out, in);
 					break;
 				case 4:
@@ -162,7 +162,7 @@ public class BuyerClient {
 
 		out.println(fromUser);
 		String fromServer = in.readLine();
-		if ("Done".equals(fromServer)) {
+		if ("0".equals(fromServer)) {
 			return 0;
 		} else {
 			if (fromServer == null) {

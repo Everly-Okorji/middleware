@@ -1,18 +1,32 @@
 package buyer;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+
+import seller.Item;
 
 public class GeneralBuyer implements Buyer {
 
 	long id;
 	
-	public GeneralBuyer() {
-		
+	// Keeps track of the items listed by the seller
+	List<Item> items = new ArrayList<Item>();
+	
+	long lastItemId = 0;
+	int minID = 0, maxID = 4;
+	
+	GeneralBuyer(long id) {
+		this.id = id;
+	}
+	
+	public long genItemId() {
+		// Fetch data from user
+		return lastItemId++;
 	}
 
 	@Override
 	public int publishBid(long itemId, float price) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 

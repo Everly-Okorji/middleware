@@ -17,11 +17,8 @@ import javax.swing.JOptionPane;
 public class SellerClient {
 	
     public static void main (String[] args) {
-
-    	// Keeps track of the items listed by the seller
-    	List<Item> items = new ArrayList<Item>();
-    	long lastItemId = 0;
     	
+    	Seller seller;
     	int userId = -1;
     	
     	// Ask user to enter host name and port number
@@ -63,6 +60,10 @@ public class SellerClient {
 					"Subscribe Receive Bid" };
 			while (true) {
 
+				// instantiate new seller
+				
+				seller = new GeneralSeller (userId);
+				
 				// Ask user to select a function, function numbered starting
 				// from 0, -1 if the dialog is closed
 				int function = JOptionPane
@@ -87,8 +88,7 @@ public class SellerClient {
 				switch (function) {
 				case 0: // command: Publish Available Item
 
-					// Fetch data from user
-					itemId = lastItemId++;
+					itemId = seller.genItemId();
 					name = JOptionPane.showInputDialog("Enter name of item: ");
 					attributes = JOptionPane
 							.showInputDialog("Enter a set of attributes, separated by commas: ");
@@ -99,7 +99,7 @@ public class SellerClient {
 							Arrays.asList(attributes.split(",")));
 
 					// Store data in list
-					items.add(new Item(itemId, name, attr, minimumBid));
+					seller.publishAvailableItem(itemId, name, attr, minimumBid);
 
 					fromUser = "A#Publish Available Item#Seller" + userId + "#"
 							+ itemId + "#" + name + "#" + attributes + "#"
@@ -112,7 +112,7 @@ public class SellerClient {
 					// Fetch data from user
 					itemId = new Long(
 							JOptionPane.showInputDialog("Enter an Item ID: "));
-					fromUser = "B#Seller" + userId + "#" + itemId;
+					fromUser = "B#Publish Bid Update#Seller" + userId + "#" + itemId;
 					status = send(fromUser, out, in);
 					break;
 					
@@ -121,13 +121,13 @@ public class SellerClient {
 					itemId = new Long (JOptionPane.showInputDialog("Enter Item ID: "));
 					finalPrice = new Double (JOptionPane.showInputDialog("Enter final price: $"));
 					buyerId = new Long (JOptionPane.showInputDialog("Enter Buyer ID: "));
-					fromUser = "C#Seller" + userId + "#" + itemId + "#" + finalPrice + "#" + buyerId;
+					fromUser = "C#Publish Finalize Sale#Seller" + userId + "#" + itemId + "#" + finalPrice + "#" + buyerId;
 					status = send(fromUser, out, in);
 					break;
 					
 				case 3: 	// command: Subscribe Receive Bid
 					itemId = new Long (JOptionPane.showInputDialog("Enter Item ID: "));
-					fromUser = "D#Seller" + userId + "#" + itemId;
+					fromUser = "D#Subscribe Receive Bid#Seller" + userId + "#" + itemId;
 					status = send(fromUser, out, in);
 					break;
 					
@@ -167,7 +167,7 @@ public class SellerClient {
 		
     	out.println(fromUser);
 		String fromServer = in.readLine();
-		if ("Done".equals(fromServer)) {
+		if ("0".equals(fromServer)) {
 			return 0;
 		} else {
 			if (fromServer == null) {
