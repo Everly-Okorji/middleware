@@ -5,183 +5,191 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import javax.swing.JOptionPane;
 
 public class SellerClient {
 	
-    public static void main (String[] args) {
+	public static GeneralSeller seller;
+	public static Socket sellerSocket;
+	public static PrintWriter out;
+	
+	BufferedReader in;
+	int userId;
+	MessageHandler mHandler;
+	Thread messageThread;
+	
+	public SellerClient() {
+		
+    	try {
+    		sellerSocket = new Socket("localhost", 4444);
+        	out = new PrintWriter(sellerSocket.getOutputStream(), true);
+			in = new BufferedReader(
+			    new InputStreamReader(sellerSocket.getInputStream()));
+			
+		} catch (IOException e) {
+			System.out.println("Seller Socket or one of its components could not be created!");
+			System.exit(1);
+		}
     	
-    	Seller seller;
-    	int userId = -1;
+    	mHandler = new MessageHandler();
     	
-    	// Ask user to enter host name and port number
-    	String hostName = "localhost";
-    	int portNumber = 4444;
+	}
 
-    	// Create connection to socket and fetch input and output streams
-        try (
-            Socket sellerSocket = new Socket(hostName, portNumber);
-            PrintWriter out = new PrintWriter(sellerSocket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(
-                new InputStreamReader(sellerSocket.getInputStream()));
-        ) {
-        	
-			int result = JOptionPane.showConfirmDialog(null,
-					"Are you a new user? ");
+	public boolean getId() {
+/*
+		int result = JOptionPane.showConfirmDialog(null, "Are you a new user? ");
 
-			if (result == JOptionPane.CANCEL_OPTION) {
-				close(out, in, sellerSocket, 0);
-			} else if (result == JOptionPane.YES_OPTION) {
-				String msg = "Y#Seller";
-				out.println(msg);
-				userId = Integer.parseInt(in.readLine());
-				JOptionPane.showMessageDialog(null, "Your ID is: " + userId);
+		switch (result) {
+		case JOptionPane.CANCEL_OPTION:
+			close(0);
+			return false;
+		case JOptionPane.YES_OPTION:
+			String msg = "Y#Seller";
+			out.println(msg);
+			userId = Integer.parseInt(in.readLine());
+			JOptionPane.showMessageDialog(null, "Your ID is: " + userId);
+			return true;
+		case JOptionPane.NO_OPTION:
+			userId = Integer.parseInt(JOptionPane.showInputDialog(null, "Enter your ID: "));
+			return false;
+		default:
+			System.out.println("Could not determine code in Seller ID authentication!");
+			close(1);
+			return false;
+		} */
+		
+		try {
+			userId = Integer.parseInt(in.readLine());
+		} catch (NumberFormatException e) {
+			System.err.println("User ID is not a valid long number! System will shut down.");
+			close(1);
+			return false;
+		} catch (IOException e) {
+			System.err.println("I/O Exception while listening for a User Id");
+			close(1);
+			return false;
+		}
+		JOptionPane.showMessageDialog(null, "Your ID is: " + userId);
+		return true;
+		
+	}
+	
+    public void run () {
 
-			} else if (result == JOptionPane.NO_OPTION) {
-				userId = Integer.parseInt(JOptionPane.showInputDialog(null,
-						"Enter your ID: "));
-			} else {
-				System.out
-						.println("Could not determine code in Seller ID authentication!");
-				close(out, in, sellerSocket, 1);
+    	// instantiate new seller
+		seller = new GeneralSeller (userId, out);
+		
+		// Create new thread to handle messages
+		messageThread = new Thread(new Runnable () {
+			@Override
+			public void run() {
+				while (true) mHandler.handleNextMessage();
 			}
+		});
+		messageThread.start();
+		
+		String fromUser;
+		String[] options = { "Publish Available Item", "Finalize Sale"};
+		
+		while (true) {
+			
+			// Ask user to select a function, function numbered starting
+			// from 0, -1 if the dialog is closed
+			int function = JOptionPane
+					.showOptionDialog(null,
+							"Choose a seller command to execute:",
+							"Seller", JOptionPane.DEFAULT_OPTION,
+							JOptionPane.QUESTION_MESSAGE, null, options,
+							options[0]);
 
-			String fromUser;
+			// Quit program if the user closes the dialog box
+			if (function == JOptionPane.CLOSED_OPTION)
+				close(0);
 
-			String[] options = { "Publish Available Item",
-					"Publish Bid Update", "Publish Finalize Sale",
-					"Subscribe Receive Bid" };
-			while (true) {
+			long itemId, buyerId;
+			String name, attributes;
+			float minimumBid, finalPrice;
 
-				// instantiate new seller
-				
-				seller = new GeneralSeller (userId);
-				
-				// Ask user to select a function, function numbered starting
-				// from 0, -1 if the dialog is closed
-				int function = JOptionPane
-						.showOptionDialog(null,
-								"Choose a seller command to execute:",
-								"Seller", JOptionPane.DEFAULT_OPTION,
-								JOptionPane.QUESTION_MESSAGE, null, options,
-								options[0]);
+			switch (function) {
+			case 0: // command: Publish Available Item
 
-				// Quit program if the user closes the dialog box
-				if (function == JOptionPane.CLOSED_OPTION)
-					close(out, in, sellerSocket, 0);
-
-				long itemId = -1;
-				String name;
-				String attributes;
-				float minimumBid;
-				double finalPrice;
-				long buyerId = -1;
-				int status = -1;
-
-				switch (function) {
-				case 0: // command: Publish Available Item
-
-					itemId = seller.genItemId();
-					name = JOptionPane.showInputDialog("Enter name of item: ");
-					attributes = JOptionPane
-							.showInputDialog("Enter a set of attributes, separated by commas: ");
+				// Fetch information from user
+				name = JOptionPane.showInputDialog("Enter name of item: ");
+				attributes = JOptionPane
+						.showInputDialog("Enter a set of attributes, separated by commas: ");
+				try {
 					minimumBid = Float.parseFloat(JOptionPane
 							.showInputDialog("Enter minimum bid: "));
-
-					Set<String> attr = new HashSet<String>(
-							Arrays.asList(attributes.split(",")));
-
-					// Store data in list
-					seller.publishAvailableItem(itemId, name, attr, minimumBid);
-
-					fromUser = "A#Publish Available Item#Seller" + userId + "#"
-							+ itemId + "#" + name + "#" + attributes + "#"
-							+ minimumBid;
-					status = send(fromUser, out, in);
+				} catch (NumberFormatException e) {
+					System.err
+							.println("Minimum bid in 'Publish Available Item' must be a number!");
 					break;
+				}
 
-				case 1: 	// command: Publish Bid Update
+				// Execute instruction in seller's class
+				itemId = seller.publishAvailableItem(name, attributes, minimumBid);
 
-					// Fetch data from user
+				// Check if itemId is non-negative, and if not, return error
+				// status
+				if (itemId >= 0) {
+					// Create message and pass to broker
+					fromUser = "A#Publish Available Item#Seller" + userId
+							+ "#" + itemId + "#" + name + "#" + attributes
+							+ "#" + minimumBid;
+					out.println(fromUser);
+				}
+				else{
+					System.err.println("Item cannot be added to the list!");
+				}
+				break;
+
+			case 1:
+				// command: Finalize Sale
+				try {
 					itemId = new Long(
-							JOptionPane.showInputDialog("Enter an Item ID: "));
-					fromUser = "B#Publish Bid Update#Seller" + userId + "#" + itemId;
-					status = send(fromUser, out, in);
-					break;
-					
-				case 2: 
-					// command: Publish Finalize Sale
-					itemId = new Long (JOptionPane.showInputDialog("Enter Item ID: "));
-					finalPrice = new Double (JOptionPane.showInputDialog("Enter final price: $"));
-					buyerId = new Long (JOptionPane.showInputDialog("Enter Buyer ID: "));
-					fromUser = "C#Publish Finalize Sale#Seller" + userId + "#" + itemId + "#" + finalPrice + "#" + buyerId;
-					status = send(fromUser, out, in);
-					break;
-					
-				case 3: 	// command: Subscribe Receive Bid
-					itemId = new Long (JOptionPane.showInputDialog("Enter Item ID: "));
-					fromUser = "D#Subscribe Receive Bid#Seller" + userId + "#" + itemId;
-					status = send(fromUser, out, in);
-					break;
-					
-				default:
+							JOptionPane.showInputDialog("Enter Item ID: "));
+					finalPrice = new Float(
+							JOptionPane
+									.showInputDialog("Enter final price ($)"));
+					buyerId = new Long(
+							JOptionPane.showInputDialog("Enter Buyer ID: "));
+				} catch (NumberFormatException e) {
+					System.err
+							.println("One of the inputs in 'Finalize Sale' is not a valid number!");
 					break;
 				}
+				fromUser = "C#Publish Finalize Sale#Seller" + userId + "#"
+						+ itemId + "#" + finalPrice + "#" + buyerId;
+				out.println(fromUser);
+				break;
 
-				if (status == 0) {
-					JOptionPane.showMessageDialog(null,
-							"Execution Complete! Item ID is " + itemId);
-				} else {
-					if (status == 1) {
-						JOptionPane
-								.showMessageDialog(null,
-										"Server unresponsive! System will shut down now.");
-						close(out, in, sellerSocket, 1);
-					} else
-						JOptionPane.showMessageDialog(null,
-								"Server returned unexpected message!");
+			default:
+				System.err.println("Invalid command!");
+				break;
+			}
+			
+			// Get all pending messages from broker
+	    	try {
+				while (in.ready()) {
+					String message = in.readLine();
+					mHandler.addMessage(message);
 				}
-				
-				status = -1;
-
+			} catch (IOException e) {
+				System.err.println("Buffered Reader error! System will close now.");
+				close(1);
 			}
-           
-        } catch (UnknownHostException e) {
-            System.err.println("Don't know about host " + hostName);
-            System.exit(1);
-        } catch (IOException e) {
-            System.err.println("Couldn't get I/O for the connection to " +
-                hostName);
-            System.exit(1);
-        }
-    }
-    
-    private static int send(String fromUser, PrintWriter out, BufferedReader in) throws IOException {
-		
-    	out.println(fromUser);
-		String fromServer = in.readLine();
-		if ("0".equals(fromServer)) {
-			return 0;
-		} else {
-			if (fromServer == null) {
-				return 1;
-			}
-			return 2;
+	    	
 		}
     }
    
-    public static void close(PrintWriter out, BufferedReader in, Socket sellerSocket, int code) {
+    public void close(int code) {
     	
     	// Tell server to close connection
     	String fromUser = "Z#Quit";
     	out.println(fromUser);
+    	
+    	messageThread.stop();
     	
     	// Close IO handles
     	try {
@@ -194,5 +202,6 @@ public class SellerClient {
     	// Exit
     	System.exit(code);
     }
+
 }
 

@@ -29,7 +29,7 @@ public class GeneralBroker implements Broker {
 	@Override
 	public int publishAvailableItem(long sellerId, long itemId, String name,
 			String attributes, float minimumBid) { // TODO
-				return -1;
+				return 0;
 		/*
 		// Only allow IDs 0 to 4
 		if (sellerId < minID || sellerId > 4) {

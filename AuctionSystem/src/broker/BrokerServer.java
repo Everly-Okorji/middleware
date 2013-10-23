@@ -47,7 +47,7 @@ public class BrokerServer {
 			        		case 'A':
 			        			//Publish Available Item
 			           			outputLine1 = "" + broker.publishAvailableItem(Long.parseLong(command[2].substring(6)), Long.parseLong(command[3]), command[4], command[5],Float.parseFloat(command[6]));
-			        			out1.println(outputLine1);   			
+			        			out1.println('A' + outputLine1);   			
 			        			break;
 			        		case 'B': 
 			        			//Publish Bid Update

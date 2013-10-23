@@ -11,6 +11,9 @@ public class Item {
 	public float currentBid;
 	public long buyerId;
 	
+	long newBidBuyerId;
+	float newCurrentBid;
+	
 	Item(long itemId, String name, Set<String> attributes, float minimumBid) {
 		this.itemId = itemId;
 		this.name = name;
@@ -19,10 +22,19 @@ public class Item {
 		this.currentBid = 0.0f;
 	}
 	
+	boolean confirmBid(long buyerId, float bid) {
+		if ((Float.compare(bid, newCurrentBid) == 0) && Long.valueOf(this.buyerId).equals(buyerId)) {
+			currentBid = newCurrentBid;
+			this.buyerId = newBidBuyerId;
+			return true;
+		}
+		return false;
+	}
+	
 	boolean bid (long buyerId, float bid) {
 		if (bid > minimumBid && bid > currentBid) {
-			currentBid = bid;
-			this.buyerId = buyerId;
+			newCurrentBid = bid;
+			newBidBuyerId = buyerId;
 			return true;
 		}
 		

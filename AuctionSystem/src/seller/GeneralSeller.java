@@ -1,82 +1,109 @@
 package seller;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-public class GeneralSeller implements Seller {
+public class GeneralSeller {
 
 	long id;
+	List<Item> activeSales, pendingSales;
+	PrintWriter toBroker;
 	
-	// Keeps track of the items listed by the seller
-	List<Item> items = new ArrayList<Item>();
 	
 	long lastItemId = 0;
-	int minID = 0, maxID = 4;
 	
-	GeneralSeller(long id) {
+	GeneralSeller(long id, PrintWriter out) {
 		this.id = id;
+		activeSales = new ArrayList<Item>();
+		pendingSales = new ArrayList<Item>();
+		toBroker = out;
 	}
 	
-	public long genItemId() {
-		// Fetch data from user
+	public long generateItemId() {
 		return lastItemId++;
 	}
+
 	
-	@Override
-	public int publishAvailableItem(long itemId, String name,
-			Set<String> attributes, float minimumBid) {
+	public long publishAvailableItem(String name,
+			String attributes, float minimumBid) {
 		
 		// Check valid name and attributes
-		if (name.isEmpty()) return 2;
-		
+		if (name.isEmpty()) return -1;
 		// Check valid bid
-		if (minimumBid <= 0.0) return 3;
+		if (minimumBid <= 0.0) return -2;
 		
-		if (items.add(new Item(itemId, name, attributes, minimumBid))) {
-			return 0;
-		} else return 4;
+		Set<String> attr = new HashSet<String>(
+				Arrays.asList(attributes.split(",")));
+		long itemId=generateItemId();
+		
+		if (pendingSales.add(new Item(itemId, name, attr, minimumBid))) {
+			return itemId;
+		} else return -3;
+		
 	}
 	
-	public boolean bid(long itemId, float price) {
+	public void confirmAddItem(long itemId) {
+		Iterator<Item> it = pendingSales.iterator();
+		while (it.hasNext()) {
+			Item pendingItem = it.next();
+			if (Long.valueOf(pendingItem.itemId).equals(Long.valueOf(itemId))) {
+				it.remove();
+				activeSales.add(pendingItem);
+				return;
+			} else {
+				it.remove();
+			}
+		}
+	}
+	
+	public void bid(long buyerId, long itemId, float price) {
 
 		// Check if item ID is in list
 		int position = -1;
-		for (int pos = 0; pos < items.size(); pos++) {
-			if (Long.valueOf(itemId).equals(Long.valueOf(items.get(0).itemId))) {
+		for (int pos = 0; pos < activeSales.size(); pos++) {
+			if (Long.valueOf(itemId).equals(Long.valueOf(activeSales.get(0).itemId))) {
 				position = pos;
 				break;
 			}
 		}
-		if (position < 0) return false; // Item not on list
+		if (position < 0) return; // Item not on list
+
+		if (activeSales.get(0).bid(buyerId, price)) { 
+			// Publish Bid Update
+			String fromUser = "B#Publish Bid Update#Seller" + id + "#" + itemId;
+			SellerClient.out.println(fromUser);
+		} else return; // Price too low
+	
+	}
+	
+	public void confirmBidUpdate(long buyerId, long itemId, float price) {
 		
-		if (items.get(0).bid(id, price)) { 
-			return true;
-		} else return false; // Price too low
+		Iterator<Item> it = activeSales.iterator();
+		while (it.hasNext()) {
+			Item item = it.next();
+			if (Long.valueOf(item.itemId).equals(Long.valueOf(itemId))) {
+				item.confirmBid(buyerId, price);
+			}
+		}
+		
+	}
+	
+	public void finalizeSale(long buyerId, long itemId, float price) {
+		Iterator<Item> it = activeSales.iterator();
+		while (it.hasNext()) {
+			if (Long.valueOf(it.next().itemId).equals(Long.valueOf(itemId)))
+				it.remove();
+		}
 	}
 
-	@Override
-	public int publishBidUpdate(long itemId) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int publishFinalizeSale(long itemId, float finalPrice, long buyerId) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int subscribeReceiveBid(long itemId) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
 	public long getId() {
-		// TODO Auto-generated method stub
-		return 0;
+		return id;
 	}
+
 
 }
