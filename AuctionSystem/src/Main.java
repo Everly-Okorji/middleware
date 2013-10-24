@@ -9,12 +9,12 @@ public class Main {
 
 		new Thread(new Runnable() {
 			public void run() {
-				BrokerServer.main(new String[0]);
+				new BrokerServer("localhost", 2000);
 			}
 		}).start();
 		new Thread(new Runnable() {
 			public void run() {
-				SellerClient.main(new String[0]);
+				seller.Main.main(new String[0]);
 			}
 		}).start();
 	}

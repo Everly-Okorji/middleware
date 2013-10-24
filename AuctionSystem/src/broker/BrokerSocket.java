@@ -11,22 +11,66 @@ public class BrokerSocket {
 
 	ServerSocket serverSocket;
 	Socket clientSocket;
+	PrintWriter out;
+	BufferedReader in;
+	int port;
 	
 	BrokerSocket(int port) {
+		
+		this.port = port;
 		try {
 			serverSocket = new ServerSocket(port);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("Broker's server socket at port " + port + " encountered an I/O exception!");
+			close();
 		}
 	}
 	
 	void accept() {
 		// Create a client socket to accept connection to the server socket
+        try {
+            clientSocket = serverSocket.accept();
+        } catch (IOException e) {
+            System.err.println("Accept failed for Broker's client socket at port" + port + "!");
+            System.exit(1);
+        }
 	}
 
 	void run() {
 		
+		// Instantiate output and input streams
+        try {
+			out = new PrintWriter(clientSocket.getOutputStream(), true);
+	        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+		} catch (IOException e) {
+			System.err.println("I/O Exception at BrokerSocket's run method while instantiating PrintWriter and BufferedReader objects!");
+			close();
+		}
+        
+        // Wait for instructions and execute them
+		String inputFromClient;
+		try {
+			while ((inputFromClient = in.readLine()) != null) {
+				inputFromClient = in.readLine();
+				BrokerServer.mHandler.addMessage(inputFromClient);
+			}
+		} catch (IOException e) {
+			System.err.println("Input stream from client produced an I/O Exception!");
+			close();
+		}
+		
+		// Close streams
+		try {
+			in.close();
+			out.close();
+		} catch (IOException e) {
+			System.err.println("Error while closing input stream in BrokerSocket class!");
+			close();
+		}
+	}
+	
+	void close() {
+		System.exit(1);
 	}
 	
 	

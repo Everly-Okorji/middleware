@@ -10,20 +10,34 @@ import java.net.UnknownHostException;
 public class BrokerServer {
 
 	final int NUM_SOCKETS = 3;
+	static GeneralBroker broker;
 
 	Socket socketToParent;
-	PrintWriter toParent;
-	BufferedReader fromParent;
+	static PrintWriter toParent;
+	static BufferedReader fromParent;
 	int parentPort;
 	boolean hasParent;
 
+	static MessageHandler mHandler;
+	Thread mThread;
+	
 	BrokerSocket[] brokerSockets;
 	int[] childPorts;
 	ChildThread[] childThreads;
 
 	// Parameters are hostname and port of SuperBroker
-	BrokerServer(String hostname, int port) {
-
+	public BrokerServer(String hostname, int port) {
+		
+		mHandler = new MessageHandler();
+		
+		// Handle messages
+		mThread = new Thread (new Runnable() {
+			@Override
+			public void run() {
+				while (true) mHandler.handleNextMessage();
+			}
+		});
+		
 		Socket connectToSB;
 		PrintWriter out;
 		BufferedReader in;
@@ -63,10 +77,11 @@ public class BrokerServer {
 		// threads
 		brokerSockets = new BrokerSocket[NUM_SOCKETS];
 		for (int i = 0; i < NUM_SOCKETS; i++) {
-			if (childPorts[i] > 0)
+			if (childPorts[i] > 0) {
 				brokerSockets[i] = new BrokerSocket(childPorts[i]);
-			childThreads[i] = new ChildThread(brokerSockets[i], i);
-			childThreads[i].start();
+				childThreads[i] = new ChildThread(brokerSockets[i], i);
+				childThreads[i].start();
+			}
 		}
 
 		if (hasParent) {
@@ -92,11 +107,46 @@ public class BrokerServer {
 	}
 
 	void run() {
+		
+		// Handle messages
+		mThread.start();
+		
+		// Fetch messages from parent
+		String inputFromParent;
+		if (hasParent) {
+			try {
+				while ((inputFromParent = fromParent.readLine()) != null) {
+					mHandler.addMessage(inputFromParent);
+				}
+			} catch (IOException e1) {
+				System.err.println("I/O Exception found while fetching messages from broker's parent");
+			}
 
+			try {
+				socketToParent.close();
+				toParent.close();
+				fromParent.close();
+			} catch (IOException e) {
+				System.err
+						.println("Error closing I/O handles in BrokerServer!");
+				close();
+			}
+		}
 	}
 
 	void close() {
-		System.exit(1); // TODO
+
+    	mThread.stop();
+    	
+    	// Close IO handles
+    	try {
+    		if (fromParent != null) fromParent.close();
+			if (toParent != null) toParent.close();
+		} catch (IOException e) {
+			System.exit(1);
+		}
+
+		System.exit(1);
 	}
 
 }
