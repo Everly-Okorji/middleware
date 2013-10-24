@@ -90,7 +90,7 @@ public class BrokerSocket {
 	
 	
 	
-	
+	/*
 	void temp() {
 
 		ServerSocket serverSocket1 = null;
@@ -222,5 +222,5 @@ public class BrokerSocket {
 			System.err.println("Client Socket 1: Input/Output error.");
 			System.exit(1);
 		}
-	}
+	}*/
 }
