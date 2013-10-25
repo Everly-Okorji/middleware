@@ -1,8 +1,7 @@
 package broker;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 public class Item {
@@ -13,22 +12,23 @@ public class Item {
 	public float minimumBid;
 	public float currentBid;
 	public long buyerId;
+	public long sellerId;
+	boolean saleFinalized;
 	
-	long newBidBuyerId;
-	float newCurrentBid;
+	private Set<Long> bidUpdatesSubFromBuyers;
+	private Set<Long> saleSubFromBuyers;
 	
-	private List<Long> bidUpdatesSubFromBuyers;
-	private List<Long> saleSubFromBuyers;
-	
-	Item(long itemId, String name, Set<String> attributes, float minimumBid) {
+	Item(long sellerId, long itemId, String name, Set<String> attributes, float minimumBid) {
+		this.sellerId = sellerId;
 		this.itemId = itemId;
 		this.name = name;
 		this.attributes = attributes;
 		this.minimumBid = minimumBid;
 		this.currentBid = 0.0f;
+		saleFinalized = false;
 		
-		bidUpdatesSubFromBuyers = new ArrayList<Long>();
-		saleSubFromBuyers = new ArrayList<Long>();
+		bidUpdatesSubFromBuyers = new HashSet<Long>();
+		saleSubFromBuyers = new HashSet<Long>();
 	}
 	
 	void addToBidUpdatesSubscription (long buyerId) {
@@ -50,6 +50,18 @@ public class Item {
 		return false;
 	}
 	
+	Set<Long> getSubscribersToBidUpdate() {
+		return bidUpdatesSubFromBuyers;
+	}
+	
+	Set<Long> getSubscribersToSaleFinalized() {
+		return saleSubFromBuyers;
+	}
+	
+	void finalizeSale() {
+		saleFinalized = true;
+	}
+	
 	boolean isSubscribedToSale(long buyerId) {
 		
 		Iterator<Long> it = saleSubFromBuyers.iterator();
@@ -61,19 +73,10 @@ public class Item {
 		return false;
 	}
 	
-	boolean confirmBid(long buyerId, float bid) {
-		if ((Float.compare(bid, newCurrentBid) == 0) && Long.valueOf(this.buyerId).equals(buyerId)) {
-			currentBid = newCurrentBid;
-			this.buyerId = newBidBuyerId;
-			return true;
-		}
-		return false;
-	}
-	
-	boolean bid (long buyerId, float bid) {
+	boolean makeBid (long buyerId, float bid) {
 		if (bid > minimumBid && bid > currentBid) {
-			newCurrentBid = bid;
-			newBidBuyerId = buyerId;
+			currentBid = bid;
+			this.buyerId = buyerId;
 			return true;
 		}
 		

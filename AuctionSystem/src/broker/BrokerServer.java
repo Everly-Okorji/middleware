@@ -9,20 +9,22 @@ import java.net.UnknownHostException;
 
 public class BrokerServer {
 
+	final static int[] ALL_BROKER_PORTS = {2001, 2002, 2003, 2004, 2005, 2006};
+	
 	final int NUM_SOCKETS = 3;
 	static GeneralBroker broker;
 
 	Socket socketToParent;
 	static PrintWriter toParent;
 	static BufferedReader fromParent;
-	int parentPort;
-	boolean hasParent;
+	static int parentPort;
+	static boolean hasParent;
 
 	static MessageHandler mHandler;
 	Thread mThread;
 	
-	BrokerSocket[] brokerSockets;
-	int[] childPorts;
+	static BrokerSocket[] brokerSockets;
+	static int[] childPorts;
 	ChildThread[] childThreads;
 
 	// Parameters are hostname and port of SuperBroker
@@ -49,7 +51,7 @@ public class BrokerServer {
 					connectToSB.getInputStream()));
 
 			// Get parent port
-			out.println("What is my parent's port?");
+			out.println("Broker. What is my parent's port?");
 			String parent = in.readLine();
 			if ("null".equals(parent)) {
 				parentPort = -1;
@@ -116,7 +118,7 @@ public class BrokerServer {
 		if (hasParent) {
 			try {
 				while ((inputFromParent = fromParent.readLine()) != null) {
-					mHandler.addMessage(inputFromParent);
+					mHandler.addMessage(inputFromParent + "#" + parentPort);
 				}
 			} catch (IOException e1) {
 				System.err.println("I/O Exception found while fetching messages from broker's parent");
