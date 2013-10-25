@@ -31,6 +31,7 @@ public class BrokerServer {
 	// Parameters are hostname and port of SuperBroker
 	public BrokerServer(String hostname, int port) {
 		
+		broker = new GeneralBroker(PORT_NUMBER, hasParent, parentPort);
 		mHandler = new MessageHandler();
 		
 		// Handle messages

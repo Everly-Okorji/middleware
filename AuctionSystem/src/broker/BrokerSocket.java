@@ -52,7 +52,7 @@ public class BrokerSocket {
 		try {
 			while ((inputFromClient = in.readLine()) != null) {
 				inputFromClient = in.readLine();
-				BrokerServer.mHandler.addMessage(inputFromClient + "#" + port);
+				BrokerServer.mHandler.addMessage(inputFromClient);
 			}
 		} catch (IOException e) {
 			System.err.println("Input stream from client produced an I/O Exception!");
