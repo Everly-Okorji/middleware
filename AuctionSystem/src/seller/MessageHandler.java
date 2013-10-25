@@ -54,7 +54,7 @@ public class MessageHandler {
 			SellerClient.seller.confirmAddItem(itemId);
 			break;
 			
-		case 'B':			// B#Publish Bid Update#[Buyer ID]#[Item ID]#[Final Price]
+		case 'B':			// B#Publish Bid Update#[Buyer ID]#[Item ID]#[Price]
 			if (contents.length != 5) {
 				System.err.println("'Publish Bid Update' has too few or too many arguments!");
 				return;

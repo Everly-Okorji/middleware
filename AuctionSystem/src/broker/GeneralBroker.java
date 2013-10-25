@@ -14,16 +14,12 @@ public class GeneralBroker {
 	int portNo;
 	boolean hasParent;
 	int parentPort;
-	private int lastSellerId;
-	private int lastBuyerId;
 	List<Item> localItems; // Local list of items
 	List<Item> importedItems;	// Items that come from a child broker
 	Map<Long, Long> itemIdToSender;  // Keeps track of sender of new items
 	Map<Long, Integer> itemIdToBroker;	// Keep track of broker in charge of item
 
 	GeneralBroker(int port, boolean hasParent, int parentPort) {
-		lastSellerId = 0;
-		lastBuyerId = 0;
 		portNo = port;
 		this.hasParent = hasParent;
 		this.parentPort = parentPort;
@@ -40,7 +36,7 @@ public class GeneralBroker {
 
 	// From Seller to Broker
 	public void publishAvailableItem(long sellerId, long itemId, String name,
-			String attributes, float minimumBid, int port) {
+			String attributes, float minimumBid) {
 
 		// Add item to list
 		Set<String> attr = new HashSet<String>(Arrays.asList(attributes.split(",")));
@@ -58,7 +54,7 @@ public class GeneralBroker {
 		
 		// Send confirmation message to the appropriate client (i.e. seller)
 		String confirmationMsg = "A#Publish Available Item#" + itemId;
-		sendMsg(confirmationMsg, port);
+		sendMsg(confirmationMsg, Integer.parseInt("" + sellerId));
 
 	}
 	
@@ -73,8 +69,8 @@ public class GeneralBroker {
 		
 		itemIdToSender.put(itemId, brokerId);
 		
-		// I#Broadcast Item#[Broker ID]#[Seller ID]#[Item ID]#[name]#[attributes]#[minimumBid]
-		String itemMessage = "I#Broadcast Item#" + portNo + "#" + sellerId + "#" + itemId + "#" + name + "#" + attributes + "#" + minimumBid;
+		// I#Broadcast Item#[Broker ID]#Seller[Seller ID]#[Item ID]#[name]#[attributes]#[minimumBid]
+		String itemMessage = "I#Broadcast Item#" + portNo + "#Seller" + sellerId + "#" + itemId + "#" + name + "#" + attributes + "#" + minimumBid;
 		
 		// Send item up to parent broker if parent exists
 		if (hasParent) {
@@ -94,19 +90,16 @@ public class GeneralBroker {
 	}
 
 	// From Buyer to Broker
-	public void publishBid(long buyerId, long itemId, float price, int port) {
+	public void publishBid(long buyerId, long itemId, float price) {
 
 		// itemIdToPort.put(itemId, port);
 
-		String bidMsg = "E#Publish Bid#" + buyerId + "#" + itemId + "#" + price;
+		String bidMsg = "E#Publish Bid#Buyer" + buyerId + "#" + itemId + "#" + price;
 
 		long sender = itemIdToSender.get(itemId);
 
-		// Publish
-		if (Long.valueOf(sender).equals(Long.valueOf(portNo))) { // I have the
-																	// item in
-																	// my local
-																	// list
+		// Check if I have the item in my local list (i.e. I am the 'sender')
+		if (Long.valueOf(sender).equals(Long.valueOf(portNo))) {
 
 			long sellerId = -1;
 
@@ -149,12 +142,12 @@ public class GeneralBroker {
 	}
 
 	
-	public void publishBidUpdate(long brokerId, long sellerId, long buyerId, long itemId, float price, int port) {
+	public void publishBidUpdate(long brokerId, long sellerId, long buyerId, long itemId, float price) {
 		
-		// D#Subscribe Receive Bid#[Buyer ID]#[Item ID]#[Price]
+		// E#Publish Bid#[Buyer ID]#[Item ID]#[Price]
 		String bidUpdateMsgToBuyer = "D#Subscribe Receive Bid#" + buyerId + "#" + itemId + "#" + price;
 		
-		// Send bid confirmation to buyer
+		// Send bid confirmation to buyer if buyer is one of the broker's clients
 		for (int i = 0; i < BrokerServer.childPorts.length; i++) {
 			if (Long.valueOf(BrokerServer.childPorts[i]).equals(Long.valueOf(buyerId))) {
 				BrokerServer.brokerSockets[i].out.println(bidUpdateMsgToBuyer);
@@ -211,7 +204,7 @@ public class GeneralBroker {
 		}
 		
 		// Send out bid update message to all buyers subscribed to the item
-		String bidUpdateToBuyers = "G#Subscribe Interest Bid Update#" + itemId + "#" + price;
+		String bidUpdateToBuyers = "G#Subscribe Interest Bid Update#" + buyerId + "#" + itemId + "#" + price;
 		
 		// Loop through children
 		for (int i = 0; i < BrokerServer.childPorts.length; i++) {
@@ -232,7 +225,7 @@ public class GeneralBroker {
 	}
 
 	public void publishFinalizeSale(long brokerId, long sellerId,  long buyerId, long itemId,
-			float finalPrice, int port) {
+			float finalPrice) {
 		
 		boolean saleFinalized = false;
 		Item currentItem = null;
@@ -278,7 +271,7 @@ public class GeneralBroker {
 		}
 		
 		// Send finalized sale notifications to all buyers subscribed:
-		// H#Subscribe Item Sold#[Buyer ID]#[Item ID]#[Price]
+		// H#Subscribe Item Sold#[Buyer ID]#[Item ID]#[Final Price]
 		String saleFinalizedMsgToBuyers = "H#Subscribe Item Sold#" + buyerId + "#" + itemId + "#" + finalPrice;
 		
 		// Loop through children
@@ -299,43 +292,47 @@ public class GeneralBroker {
 	}
 
 	
-	public int subscribeInterest(long buyerId, String name, String attributes,
-			float minimumBid, int port) {
-		// TODO Auto-generated method stub
-		return 0;
+	public void subscribeInterest(long buyerId, String name, String attributes,
+			float minimumBid) {
+		List<Item> matches = matchString(name);
+		
+		Set<String> attr = new HashSet<String>(
+				Arrays.asList(attributes.split(",")));
+		for (String s: attr) {
+			matches.addAll(matchString(s));
+		}
+		
+		for (Item item: matches) {
+			// F#Subscribe Interest#[Item ID]#[name]#[attributes]#[Minimum Bid]
+			String interestMsg = "F#Subscribe Interest#" + item.itemId + "#" + name + "#";
+			// Add attributes
+			String[] attributesArray = item.attributes.toArray(new String[0]);
+			if (attributesArray.length > 0) {
+				interestMsg += attributesArray[0];
+				for (int i = 1; i < attributesArray.length; i++) {
+					interestMsg += ',' + attributesArray[i];
+				}
+			}
+			interestMsg += "#" + minimumBid;
+			sendMsg(interestMsg, Integer.parseInt(buyerId + ""));
+		}
 	}
 
-	public int subscribeReceiveBid(long buyerId, long itemId, float price) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	public int subscribeInterestBidUpdate(long buyerId, long itemId, int port) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	
-	public int subscribeItemSold(long buyerId, long itemId) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	
-	public int setChildBroker(long brokerId) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	
-	public Broker getParent() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	
-	public String genSellerId() {
-		return lastSellerId++ + "";
+	public void subscribeInterestBidUpdate(long buyerId, long itemId) {
+		
+		for (Item item: localItems) {
+			if (Long.valueOf(itemId).equals(Long.valueOf(item.itemId))) {
+				item.addToBidUpdatesSubscription(buyerId);
+				return;
+			}
+		}
+		
+		for (Item item: importedItems) {
+			if (Long.valueOf(itemId).equals(Long.valueOf(item.itemId))) {
+				item.addToBidUpdatesSubscription(buyerId);
+				return;
+			}
+		}
 	}
 	
 	private void sendMsg(String message, int port) {
@@ -346,10 +343,34 @@ public class GeneralBroker {
 			}
 		}
 	}
-
 	
-	public String genBuyerId() {
-		return lastBuyerId++ + "";
+	private List<Item> matchString(String str) {
+		
+		List<Item> result = new ArrayList<Item>();
+		
+		for (Item item: localItems) {
+			if (item.name.contains(str)) {
+				result.add(item);
+				break;
+			}
+			for (String attr: item.attributes) {
+				if (attr.contains(str)) result.add(item);
+				break;
+			}
+		}
+		
+		for (Item item: importedItems) {
+			if (item.name.contains(str)) {
+				result.add(item);
+				break;
+			}
+			for (String attr: item.attributes) {
+				if (attr.contains(str)) result.add(item);
+				break;
+			}
+		}
+		
+		return result;
 	}
 
 }

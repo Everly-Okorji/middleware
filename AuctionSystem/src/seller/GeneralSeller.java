@@ -75,7 +75,7 @@ public class GeneralSeller {
 
 		if (activeSales.get(0).bid(buyerId, price)) { 
 			// Publish Bid Update
-			String fromUser = "B#Publish Bid Update#Seller" + id + "#" + itemId;
+			String fromUser = "B#Publish Bid Update#Seller" + id + "#Buyer" + buyerId + "#" + itemId + "#" + price;
 			SellerClient.out.println(fromUser);
 		} else return; // Price too low
 	

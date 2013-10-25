@@ -13,6 +13,7 @@ public class BrokerServer {
 	
 	final int NUM_SOCKETS = 3;
 	static GeneralBroker broker;
+	int PORT_NUMBER;
 
 	Socket socketToParent;
 	static PrintWriter toParent;
@@ -51,9 +52,9 @@ public class BrokerServer {
 					connectToSB.getInputStream()));
 
 			// Get parent port
-			out.println("Broker. What is my parent's port?");
+			out.println("I'm a Broker. What is my parent's port?");
 			String parent = in.readLine();
-			if ("null".equals(parent)) {
+			if ("0".equals(parent)) {
 				parentPort = -1;
 				hasParent = false;
 			} else {
@@ -63,14 +64,16 @@ public class BrokerServer {
 
 			// Get children ports
 			for (int i = 0; i < NUM_SOCKETS; i++) {
-				out.println("Child Port " + i);
+				out.println("I'm a Broker. What is my child's port?");
 				String child = in.readLine();
-				if ("null".equals(child)) {
+				if ("0".equals(child)) {
 					childPorts[i] = -1;
 				} else {
 					childPorts[i] = Integer.parseInt(child);
 				}
 			}
+			
+			out.println("I'm done.");
 		} catch (IOException e1) {
 			close();
 		}

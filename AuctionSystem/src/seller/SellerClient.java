@@ -16,20 +16,31 @@ public class SellerClient {
 	
 	BufferedReader in;
 	int userId;
+	int parentPort;
 	MessageHandler mHandler;
 	Thread messageThread;
 	
 	public SellerClient() {
 		
     	try {
-    		sellerSocket = new Socket("localhost", 4444);
+    		sellerSocket = new Socket("localhost", 2000);
         	out = new PrintWriter(sellerSocket.getOutputStream(), true);
 			in = new BufferedReader(
 			    new InputStreamReader(sellerSocket.getInputStream()));
-			
+			getId();
+			out.println("I'm a Client. What is my broker's port?");
+			parentPort = Integer.parseInt(in.readLine());
+			sellerSocket = new Socket("localhost", parentPort);
+        	out = new PrintWriter(sellerSocket.getOutputStream(), true);
+			in = new BufferedReader(
+			    new InputStreamReader(sellerSocket.getInputStream()));
 		} catch (IOException e) {
 			System.out.println("Seller Socket or one of its components could not be created!");
 			System.exit(1);
+		} catch (NumberFormatException e) {
+			System.err.println("Parent Port is not a valid int number! System will shut down.");
+			out.println("I'm done.");
+			close(1);
 		}
     	
     	mHandler = new MessageHandler();
@@ -37,36 +48,18 @@ public class SellerClient {
 	}
 
 	public boolean getId() {
-/*
-		int result = JOptionPane.showConfirmDialog(null, "Are you a new user? ");
-
-		switch (result) {
-		case JOptionPane.CANCEL_OPTION:
-			close(0);
-			return false;
-		case JOptionPane.YES_OPTION:
-			String msg = "Y#Seller";
-			out.println(msg);
-			userId = Integer.parseInt(in.readLine());
-			JOptionPane.showMessageDialog(null, "Your ID is: " + userId);
-			return true;
-		case JOptionPane.NO_OPTION:
-			userId = Integer.parseInt(JOptionPane.showInputDialog(null, "Enter your ID: "));
-			return false;
-		default:
-			System.out.println("Could not determine code in Seller ID authentication!");
-			close(1);
-			return false;
-		} */
 		
 		try {
+			out.println("I'm a Client. What is my port?");
 			userId = Integer.parseInt(in.readLine());
 		} catch (NumberFormatException e) {
 			System.err.println("User ID is not a valid long number! System will shut down.");
+			out.println("I'm done.");
 			close(1);
 			return false;
 		} catch (IOException e) {
 			System.err.println("I/O Exception while listening for a User Id");
+			out.println("I'm done.");
 			close(1);
 			return false;
 		}
@@ -159,8 +152,8 @@ public class SellerClient {
 							.println("One of the inputs in 'Finalize Sale' is not a valid number!");
 					break;
 				}
-				fromUser = "C#Publish Finalize Sale#Seller" + userId + "#"
-						+ itemId + "#" + finalPrice + "#" + buyerId;
+				fromUser = "C#Publish Finalize Sale#Seller" + userId + "#Buyer" + buyerId +
+						"#" + itemId + "#" + finalPrice;
 				out.println(fromUser);
 				break;
 
@@ -186,7 +179,7 @@ public class SellerClient {
     public void close(int code) {
     	
     	// Tell server to close connection
-    	String fromUser = "Z#Quit";
+    	String fromUser = "Z#Quit#" + userId;
     	out.println(fromUser);
     	
     	messageThread.stop();
