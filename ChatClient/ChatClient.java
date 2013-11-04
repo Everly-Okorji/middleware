@@ -1,10 +1,13 @@
 import java.rmi.Remote;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
 
 public interface ChatClient extends Remote {
-
+	BlockingQueue<String> messageQueue=null;
 	List<String> findAvailableChatRooms();
+	
+	int regChatClient(String name, ChatRegistry c);
 	
 	int joinChatRoom(String name);
 	
@@ -12,6 +15,8 @@ public interface ChatClient extends Remote {
 	
 	int sendMessage(String room, String message);
 	
-	int quit();
+	int receiveMessage(String room, String message);
+	
+	void quit();
 	
 }
