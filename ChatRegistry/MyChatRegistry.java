@@ -80,7 +80,10 @@ public class MyChatRegistry implements ChatRegistry {
 			return -1;
 		}
 	}
-
+	
+	/**
+	 * @author Everly
+	 */
 	@Override
 	public int deregister(String entityName, Type entityType) {
 		
