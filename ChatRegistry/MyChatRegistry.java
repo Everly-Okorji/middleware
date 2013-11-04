@@ -57,7 +57,7 @@ public class MyChatRegistry implements ChatRegistry {
 
 		case CHATROOM:
 			String room_name = entityName;
-			// If name is available, add chat room to list, then add name to name list
+			// If name is available, add name to name list
 			if (roomNameAvailable(room_name)) {
 				roomNames.add(room_name);
 				return 0;
@@ -80,11 +80,41 @@ public class MyChatRegistry implements ChatRegistry {
 			return -1;
 		}
 	}
-
+	
+	/**
+	 * @author Everly
+	 */
 	@Override
 	public int deregister(String entityName, Type entityType) {
-		// TODO Auto-generated method stub
-		return 0;
+		
+		switch (entityType) {
+
+		case CHATROOM:
+			String room_name = entityName;
+			// If name is available, add name to name list
+			if (!roomNameAvailable(room_name)) {
+				roomNames.remove(room_name);
+				return 0;
+			}
+			System.err.println("Attempted to deregister '" + room_name + "', but chat room doesn't exist!");
+			return 1;
+
+		case CHATCLIENT:
+			String client_name = entityName;
+			// If name is available, add client to list
+			if (!clientNameAvailable(client_name)) {
+				clientNames.remove(client_name);
+				return 0;
+			}
+			System.err.println("Attempted to deregister '" + client_name + "', but this client doesn't exist!");
+			return 1;
+
+		default:
+			System.err.println("Invalid Enum Type.");
+			return -1;
+
+		}
+
 	}
 
 	@Override
