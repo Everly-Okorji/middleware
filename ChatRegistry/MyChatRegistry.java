@@ -1,29 +1,32 @@
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * 
+ * @author Everly, Zirui
+ *
+ */
 public class MyChatRegistry implements ChatRegistry {
 
-	List<String> roomNames;
-	List<String> clientNames;
+	List<ChatRoomServer> rooms;
+	List<ChatClient> clients;
 	
 	MyChatRegistry() {
-		roomNames = new ArrayList<String>();
-		clientNames = new ArrayList<String>();
+		rooms = new ArrayList<ChatRoomServer>();
+		clients = new ArrayList<ChatClient>();
 	}
 	
 	
 	// ---------------- PRIVATE METHODS -----------------
 	
 	/**
-	 * @author Everly
 	 * @param room_name
 	 * @return true if room name is vacant, false otherwise
 	 */
 	private boolean roomNameAvailable(String room_name) {
 		
-		for (String name: roomNames) {
-			if (name.equals(room_name)) {
+		for (ChatRoomServer room: rooms) {
+			if (room.getName().equals(room_name)) {
 				return false;
 			}
 		}
@@ -31,14 +34,13 @@ public class MyChatRegistry implements ChatRegistry {
 	}
 	
 	/**
-	 * @author Everly
 	 * @param client_name
 	 * @return true if client name is vacant, false otherwise
 	 */
 	private boolean clientNameAvailable(String client_name) {
 		
-		for (String name: clientNames) {
-			if (name.equals(client_name)) {
+		for (ChatClient client: clients) {
+			if (client.getName().equals(client_name)) {
 				return false;
 			}
 		}
@@ -47,32 +49,29 @@ public class MyChatRegistry implements ChatRegistry {
 	
 	
 	//-------------- PUBLIC METHODS ---------------------
-	
-	/**
-	 * @author Everly
-	 */
+
 	@Override
-	public int register(String entityName, Type entityType) {
+	public int register(Object entity, Type entityType) {
 		switch (entityType) {
 
 		case CHATROOM:
-			String room_name = entityName;
+			ChatRoomServer room = (ChatRoomServer) entity;
 			// If name is available, add name to name list
-			if (roomNameAvailable(room_name)) {
-				roomNames.add(room_name);
+			if (this.roomNameAvailable(room.getName())) {
+				this.rooms.add(room);
 				return 0;
 			}
-			System.err.println("A chat room with name '" + room_name + "' already exists!");
+			System.err.println("A chat room with name '" + room.getName() + "' already exists!");
 			return 1;
 
 		case CHATCLIENT:
-			String client_name = entityName;
+			ChatClient client = (ChatClient) entity;
 			// If name is available, add client to list
-			if (clientNameAvailable(client_name)) {
-				clientNames.add(client_name);
+			if (this.clientNameAvailable(client.getName())) {
+				this.clients.add(client);
 				return 0;
 			}
-			System.err.println("A client with name '" + client_name + "' already exists!");
+			System.err.println("A client with name '" + client.getName() + "' already exists!");
 			return 1;
 
 		default:
@@ -81,9 +80,6 @@ public class MyChatRegistry implements ChatRegistry {
 		}
 	}
 	
-	/**
-	 * @author Everly
-	 */
 	@Override
 	public int deregister(String entityName, Type entityType) {
 		
@@ -91,22 +87,45 @@ public class MyChatRegistry implements ChatRegistry {
 
 		case CHATROOM:
 			String room_name = entityName;
-			// If name is available, add name to name list
+			// If name exists in the list, remove object from list
 			if (!roomNameAvailable(room_name)) {
-				roomNames.remove(room_name);
-				return 0;
+				ChatRoomServer room = null;
+				for (ChatRoomServer chatroom: rooms) {
+					if (chatroom.getName().equals(room_name)) {
+						room = chatroom;
+						break;
+					}
+				}
+				if (rooms.remove(room)) {
+					return 0;
+				}
+				else {
+					System.err.println("Attempted to deregister chat room '" + room_name + "', but remove operation failed!");
+					return 2;
+				}
 			}
-			System.err.println("Attempted to deregister '" + room_name + "', but chat room doesn't exist!");
+			System.err.println("Attempted to deregister chat room '" + room_name + "', but chat room doesn't exist!");
 			return 1;
 
 		case CHATCLIENT:
 			String client_name = entityName;
-			// If name is available, add client to list
+			// If name is in client list, fetch object and remove from list
 			if (!clientNameAvailable(client_name)) {
-				clientNames.remove(client_name);
-				return 0;
+				ChatClient client = null;
+				for (ChatClient c: clients) {
+					if (c.getName().equals(client_name)) {
+						client = c;
+						break;
+					}
+				}
+				if (clients.remove(client)) {
+					return 0;
+				} else {
+					System.err.println("Attempted to deregister client '" + client_name + "', but remove operation failed!");
+					return 2;
+				}
 			}
-			System.err.println("Attempted to deregister '" + client_name + "', but this client doesn't exist!");
+			System.err.println("Attempted to deregister client '" + client_name + "', but this client doesn't exist!");
 			return 1;
 
 		default:
@@ -118,9 +137,50 @@ public class MyChatRegistry implements ChatRegistry {
 	}
 
 	@Override
-	public String getInfo(String entityName) {
-		// TODO Auto-generated method stub
-		return null;
+	public Object getInfo(String entityName, Type entityType) {
+	
+		switch (entityType) {
+ 
+		case CHATROOM:
+			for (ChatRoomServer c: rooms){
+				if (c.getName().equals(entityName)){
+					return c;
+				}
+			}
+			System.err.println("Cannot find info of chat room '"+entityName+"'");
+			return null;
+			
+		case CHATCLIENT:
+			for (ChatClient c: clients){
+				if (c.getName().equals(entityName)){
+					return c;
+				}
+			}
+			System.err.println("Cannot find info of chat client '"+entityName+"'");
+			return null;
+
+		default:
+			System.err.println("Invalid Enum Type.");
+			return null;
+		}
+	}
+
+	@Override
+	public List<String> getClientsList() {
+		List<String> clientNames=new ArrayList<String>();
+		for (ChatClient client: clients){
+			clientNames.add(client.getName());
+		}
+		return clientNames;
+	}
+
+	@Override
+	public List<String> getChatRoomsList() {
+		List<String> chatRoomList=new ArrayList<String>();
+		for (ChatRoomServer chatroom: rooms){
+			chatRoomList.add(chatroom.getName());
+		}
+		return chatRoomList;
 	}
 
 }

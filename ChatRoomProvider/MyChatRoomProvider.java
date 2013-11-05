@@ -50,31 +50,7 @@ public class MyChatRoomProvider implements ChatRoomProvider {
 			return 0;
 		}
 		return result;
-	/*	
-		// Check if chat room is present
-		if (nameAvailable(room_name)) {
-			System.err.println("No chat room exists with name '" + room_name + "'!");
-			return 1;
-		}
-		
-		// Fetch chat room object
-		ChatRoomServer chatRoom = null;
-		for (ChatRoomServer room: chatRoomServers) {
-			if (room.getName().equals(room_name)) {
-				chatRoom = room;
-			}
-		}
-		
-		// Deregister chat room from registry
-		if (registry.deregister(room_name, ChatRegistry.Type.CHATROOM) == 0) {
-			chatRoomServers.remove(chatRoom);
-			roomNames.remove(room_name);
-			return 0;
-		}
-		
-		System.err.println("Registry could not remove chat room with name '" + room_name + "'!");
-		return 2;
-		*/
+
 	}
 
 }

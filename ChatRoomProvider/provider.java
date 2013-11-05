@@ -24,17 +24,32 @@ public class provider {
 		
 		
 		while (true) {
-			System.out.print("Enter a key: ");
-			switch(System.console().readLine().charAt(0)) {
-			case 'o':
-				System.out.print("Enter chat room name to open: ");
-				System.out.println("Result: " + x.openChatRoom(System.console().readLine()));
-				break;
-			case 'c':
-				System.out.print("Enter chat room name to close: ");
-				System.out.println("Result: " + x.closeChatRoom(System.console().readLine()));
-				break;
+			
+			System.out.println("\n Supported commands: 'open [room name]', 'close [room name]'");
+			System.out.print("Enter command: ");
+			
+			String instruction = System.console().readLine();
+			String[] instruction_split = instruction.split(" ");
+			
+			if (instruction_split == null) continue;
+			if (instruction_split.length != 2) continue;
+			
+			if ("open".equals(instruction_split[0])) {
+				int code = x.openChatRoom(instruction_split[1]);
+				if (code == 0) {
+					System.out.println("Room was opened.");
+				} else {
+					System.out.println("Room was not opened. Returned error code " + code);
+				}
+			} else if ("close".equals(instruction_split[0])) {
+				int code = x.closeChatRoom(instruction_split[1]);
+				if (code == 0) {
+					System.out.println("Room was closed.");
+				} else {
+					System.out.println("Room was not closed. Returned error code " + code);
+				}
 			}
+			
 		}
 		
 	}

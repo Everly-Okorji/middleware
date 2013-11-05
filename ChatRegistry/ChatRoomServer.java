@@ -1,10 +1,10 @@
-package server;
+
 import java.rmi.Remote;
 
 
 public interface ChatRoomServer extends Remote {
 
-	int join(ChatClient client);
+	int join(String clientName);
 	
 	int talk(String clientName, String message);
 	
