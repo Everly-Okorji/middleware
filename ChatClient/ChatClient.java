@@ -12,7 +12,7 @@ public interface ChatClient extends Remote {
 	
 	List<String> findAvailableChatRooms() throws RemoteException;
 	
-	int regChatClient(String name, ChatRegistry c) throws RemoteException;
+	int regChatClient() throws RemoteException;
 	
 	int joinChatRoom(String name) throws RemoteException;
 	
@@ -22,6 +22,8 @@ public interface ChatClient extends Remote {
 	
 	int receiveMessage(String room, String message) throws RemoteException;
 	
-	void quit() throws RemoteException;
+	public void printMessage();
+	
+	int quit() throws RemoteException;
 	
 }

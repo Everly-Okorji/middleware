@@ -9,17 +9,18 @@ import java.util.List;
 
 public class Client {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws RemoteException {
+		Thread messageOutputThread;
 		ChatClient x = null;
 		String host = args[0];
 		try {
-			Registry registry = LocateRegistry.getRegistry(host);
-			ChatRegistry stub = (ChatRegistry) registry.lookup("ChatRegistry");
-			x = new MyChatClient(stub);
 			System.out.println("Please Enter Your Name:");
 			String name=System.console().readLine();
 			System.out.println("Welcome, "+name+"!");
-			x.regChatClient(name, stub);
+			Registry registry = LocateRegistry.getRegistry(host);
+			ChatRegistry stub = (ChatRegistry) registry.lookup("ChatRegistry");
+			x = new MyChatClient(stub, name);
+			x.regChatClient();
 		} catch (AccessException e) {
 			System.err.println("You do not have permission to look up ChatRegistry!");
 		} catch (RemoteException e) {
@@ -36,10 +37,33 @@ public class Client {
 		List<String> joinedChatRooms=new ArrayList<String>();
 		boolean noSuchChatRoom=true;
 		String currentChatRoom=null;
-		while (true) {
-			while (x.messageQueue.isEmpty()==false){
-				System.out.println(x.messageQueue.remove());
+	
+		char c = System.console().readLine().charAt(0);
+		switch (c) {	
+		
+		case 'r':
+			x.regChatClient();
+			break;
+		case 'd':
+			x.quit();
+			break;
+			
+			default:
+				
+				break;
+				
+		}
+		
+/*		messageOutputThread=new Thread(new Runnable () {
+			@Override
+			public void run() {
+				while (true) x.printMessage();
 			}
+		});
+		messageOutputThread.start();*/
+		
+		/*while (true) {			
+			x.printMessage();
 			userInput=System.console().readLine();
 			if (userInput.substring(0, 3).equals("cmd-")){
 				switch (userInput.charAt(0)){
@@ -49,7 +73,7 @@ public class Client {
 					System.out.println("cmd-j: Join a chat room.");
 					System.out.println("cmd-l: Leave a chat room.");
 					System.out.println("cmd-c: Choose a chat room to send message.");
-					System.out.println("cmd-q: Choose a chat room to send message.");
+					System.out.println("cmd-q: Choose a chat room to quit.");
 					System.out.println("To Call the Command Menu by simply type \"cmd-m\".");
 					break;
 				case 'f': 
@@ -128,7 +152,8 @@ public class Client {
 					
 					}
 				case 'q':
-					x.quit();					
+					if (x.quit()==1) System.exit(1);	
+					System.exit(0);
 					break;
 				default: break;
 				}
@@ -139,7 +164,7 @@ public class Client {
 					System.exit(1);
 				}
 			}
-		}
+		}*/
 		
 	}
 
