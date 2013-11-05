@@ -38,8 +38,9 @@ public class MyChatRegistry implements ChatRegistry {
 	/**
 	 * @param client_name
 	 * @return true if client name is vacant, false otherwise
+	 * @throws RemoteException 
 	 */
-	private boolean clientNameAvailable(String client_name) {
+	private boolean clientNameAvailable(String client_name) throws RemoteException {
 		
 		for (ChatClient client: clients) {
 			if (client.getName().equals(client_name)) {
@@ -168,7 +169,7 @@ public class MyChatRegistry implements ChatRegistry {
 	}
 
 	@Override
-	public List<String> getClientsList() {
+	public List<String> getClientsList() throws RemoteException {
 		List<String> clientNames=new ArrayList<String>();
 		for (ChatClient client: clients){
 			clientNames.add(client.getName());

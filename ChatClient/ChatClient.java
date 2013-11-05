@@ -22,7 +22,7 @@ public interface ChatClient extends Remote {
 	
 	int receiveMessage(String room, String message) throws RemoteException;
 	
-	public void printMessage();
+	public void printMessage() throws RemoteException;
 	
 	int quit() throws RemoteException;
 	

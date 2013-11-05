@@ -6,30 +6,51 @@ import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.List;
 
-
-public class Client {
+public class client {
 
 	public static void main(String[] args) throws RemoteException {
 		Thread messageOutputThread;
-		ChatClient x = null;
 		String host = args[0];
+		
+		ChatClient x = null;
+		ChatRegistry stub = null;
+		
 		try {
-			System.out.println("Please Enter Your Name:");
-			String name=System.console().readLine();
-			System.out.println("Welcome, "+name+"!");
 			Registry registry = LocateRegistry.getRegistry(host);
-			ChatRegistry stub = (ChatRegistry) registry.lookup("ChatRegistry");
-			x = new MyChatClient(stub, name);
-			x.regChatClient();
+			stub = (ChatRegistry) registry.lookup("ChatRegistry");
 		} catch (AccessException e) {
-			System.err.println("You do not have permission to look up ChatRegistry!");
+			System.err
+					.println("You do not have permission to look up ChatRegistry!");
+			System.exit(1);
 		} catch (RemoteException e) {
-			System.err.println("Remote exception found while attempting to get a remote stub for ChatRegistry");
+			System.err
+					.println("Remote exception found while attempting to get a remote stub for ChatRegistry");
+			System.exit(1);
 		} catch (NotBoundException e) {
-			System.err.println("An object bound to the name 'ChatRegistry' does not exist!");
+			System.err
+					.println("An object bound to the name 'ChatRegistry' does not exist!");
+			System.exit(1);
 		}
 		
+		String name;
+		int result = 1;
 		
+		// Fetch valid username
+		do {
+			
+			System.out.print("Please enter a username: ");
+			name = System.console().readLine();
+
+			x = new MyChatClient(stub, name);
+			result = x.regChatClient();
+			if (result != 0) {
+				System.err
+						.println("Username already exists or cannot be used. Please use a different name!");
+			}
+			
+		} while (result != 0);
+		
+		System.out.println("Welcome, " + name + "!");
 		
 		System.out.println("To Call the Command Menu by simply type \"cmd-m\".");
 		String userInput;

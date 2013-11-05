@@ -17,7 +17,7 @@ public class MyChatRoomServer extends UnicastRemoteObject implements ChatRoomSer
 	}
 
 	@Override
-	public int join(ChatClient client) {
+	public int join(ChatClient client) throws RemoteException {
 		
 		// Check if client already exists
 		if (isExistingClient(client.getName())) {
@@ -30,7 +30,7 @@ public class MyChatRoomServer extends UnicastRemoteObject implements ChatRoomSer
 	}
 
 	@Override
-	public int talk(String clientName, String message) {
+	public int talk(String clientName, String message) throws RemoteException {
 		
 		// Check if the sender of the message is not a joined client
 		if (!isExistingClient(clientName)) {
@@ -46,7 +46,7 @@ public class MyChatRoomServer extends UnicastRemoteObject implements ChatRoomSer
 	}
 
 	@Override
-	public int leave(String clientName) {
+	public int leave(String clientName) throws RemoteException {
 		
 		// Check if client is not a joined client
 		if (!isExistingClient(clientName)) {
@@ -69,7 +69,7 @@ public class MyChatRoomServer extends UnicastRemoteObject implements ChatRoomSer
 		return name;
 	}
 	
-	private boolean isExistingClient(String new_client) {
+	private boolean isExistingClient(String new_client) throws RemoteException {
 		
 		for (ChatClient client: clients) {
 			// If they have the same name, they are the same client

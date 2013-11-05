@@ -1,26 +1,29 @@
-
 import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 
 public interface ChatClient extends Remote {
-	BlockingQueue<String> messageQueue=null;
 	
-	String getName();
+	BlockingQueue<String> messageQueue = null;
 	
-	List<String> findAvailableChatRooms();
+	String getName() throws RemoteException;
 	
-	int regChatClient(String name, ChatRegistry c);
+	List<String> findAvailableChatRooms() throws RemoteException;
 	
-	int joinChatRoom(String name);
+	int regChatClient() throws RemoteException;
 	
-	int leaveChatRoom(String name);
+	int joinChatRoom(String name) throws RemoteException;
 	
-	int sendMessage(String room, String message);
+	int leaveChatRoom(String name) throws RemoteException;
 	
-	int receiveMessage(String room, String message);
+	int sendMessage(String room, String message) throws RemoteException;
 	
-	void quit();
+	int receiveMessage(String room, String message) throws RemoteException;
+	
+	public void printMessage() throws RemoteException;
+	
+	int quit() throws RemoteException;
 	
 }

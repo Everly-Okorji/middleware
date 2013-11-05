@@ -1,20 +1,23 @@
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 
-public class MyChatClient implements ChatClient{
+public class MyChatClient extends UnicastRemoteObject implements ChatClient{
 
 	ChatRegistry registry;
 	List <ChatRoomServer>  joinedRooms;
 	String clientName;
 	BlockingQueue<String> messageQueue;
 	
-	MyChatClient(ChatRegistry registry, String name) {
+	MyChatClient(ChatRegistry registry, String name) throws RemoteException {
 		this.registry = registry;
 		this.clientName=name;
 		this.joinedRooms=new ArrayList<ChatRoomServer>();
+		this.messageQueue = new LinkedBlockingQueue<String>();
 	}
 	
 	@Override
@@ -105,7 +108,7 @@ public class MyChatClient implements ChatClient{
 		return clientName;
 	}
 	
-	public void printMessage(){
+	public void printMessage() throws RemoteException {
 		while (messageQueue.isEmpty()==false){
 			System.out.println(messageQueue.remove());
 		}
