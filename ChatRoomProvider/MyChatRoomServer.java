@@ -1,15 +1,17 @@
-package server;
 
+
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MyChatRoomServer implements ChatRoomServer {
+public class MyChatRoomServer extends UnicastRemoteObject implements ChatRoomServer {
 	
 	String name;
 	List<ChatClient> clients;
 	
 	
-	public MyChatRoomServer(String name) {
+	public MyChatRoomServer(String name) throws RemoteException {
 		this.name = name;
 		this.clients = new ArrayList<ChatClient>();
 	}

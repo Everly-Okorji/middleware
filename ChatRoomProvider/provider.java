@@ -7,7 +7,7 @@ import java.rmi.registry.Registry;
 
 public class provider {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws RemoteException {
 		ChatRoomProvider x = null;
 		String host = args[0];
 		try {
@@ -25,7 +25,7 @@ public class provider {
 		
 		while (true) {
 			
-			System.out.println("\n Supported commands: 'open [room name]', 'close [room name]'");
+			System.out.println("\nSupported commands: 'open [room name]', 'close [room name]'");
 			System.out.print("Enter command: ");
 			
 			String instruction = System.console().readLine();

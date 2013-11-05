@@ -1,3 +1,4 @@
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,8 +23,9 @@ public class MyChatRegistry implements ChatRegistry {
 	/**
 	 * @param room_name
 	 * @return true if room name is vacant, false otherwise
+	 * @throws RemoteException 
 	 */
-	private boolean roomNameAvailable(String room_name) {
+	private boolean roomNameAvailable(String room_name) throws RemoteException {
 		
 		for (ChatRoomServer room: rooms) {
 			if (room.getName().equals(room_name)) {
@@ -51,7 +53,7 @@ public class MyChatRegistry implements ChatRegistry {
 	//-------------- PUBLIC METHODS ---------------------
 
 	@Override
-	public int register(Object entity, Type entityType) {
+	public int register(Object entity, Type entityType) throws RemoteException {
 		switch (entityType) {
 
 		case CHATROOM:
@@ -81,7 +83,7 @@ public class MyChatRegistry implements ChatRegistry {
 	}
 	
 	@Override
-	public int deregister(String entityName, Type entityType) {
+	public int deregister(String entityName, Type entityType) throws RemoteException {
 		
 		switch (entityType) {
 
@@ -137,7 +139,7 @@ public class MyChatRegistry implements ChatRegistry {
 	}
 
 	@Override
-	public Object getInfo(String entityName, Type entityType) {
+	public Object getInfo(String entityName, Type entityType) throws RemoteException {
 	
 		switch (entityType) {
  
@@ -175,7 +177,7 @@ public class MyChatRegistry implements ChatRegistry {
 	}
 
 	@Override
-	public List<String> getChatRoomsList() {
+	public List<String> getChatRoomsList() throws RemoteException {
 		List<String> chatRoomList=new ArrayList<String>();
 		for (ChatRoomServer chatroom: rooms){
 			chatRoomList.add(chatroom.getName());

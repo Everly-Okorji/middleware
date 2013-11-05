@@ -1,8 +1,6 @@
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
-
-import server.ChatRoomServer;
-import server.MyChatRoomServer;
 
 /**
  * 
@@ -21,18 +19,19 @@ public class MyChatRoomProvider implements ChatRoomProvider {
 	}
 	
 	@Override
-	public int openChatRoom(String room_name) {
-		int result = registry.register(room_name, ChatRegistry.Type.CHATROOM);
+	public int openChatRoom(String room_name) throws RemoteException {
+		ChatRoomServer room = new MyChatRoomServer(room_name);
+		int result = registry.register(room, ChatRegistry.Type.CHATROOM);
 		if (result == 0) {
-			ChatRoomServer room = new MyChatRoomServer(room_name);
 			chatRooms.add(room);
 			return 0;
 		}
+		System.err.println("Could not open chat room with name '" + room_name + "'. Error code was " + result);
 		return result;
 	}
 
 	@Override
-	public int closeChatRoom(String room_name) {
+	public int closeChatRoom(String room_name) throws RemoteException {
 		
 		int result = registry.deregister(room_name, ChatRegistry.Type.CHATROOM);
 		// Check if registry was successful
@@ -49,6 +48,7 @@ public class MyChatRoomProvider implements ChatRoomProvider {
 			chatRooms.remove(room);
 			return 0;
 		}
+		System.err.println("Could not close chat room with name '" + room_name + "'. Error code was " + result);
 		return result;
 
 	}
