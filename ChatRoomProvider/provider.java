@@ -8,8 +8,15 @@ import java.rmi.registry.Registry;
 public class provider {
 
 	public static void main(String[] args) throws RemoteException {
-		ChatRoomProvider x = null;
+		
+		if (args.length != 1) {
+			System.out.println("Please enter a single argument (i.e. hostname of your registy)!");
+			System.exit(0);
+		}
+		
 		String host = args[0];
+		ChatRoomProvider x = null;
+		
 		try {
 			Registry registry = LocateRegistry.getRegistry(host);
 			ChatRegistry stub = (ChatRegistry) registry.lookup("ChatRegistry");
@@ -26,7 +33,6 @@ public class provider {
 		while (true) {
 			
 			System.out.println("\nSupported commands: 'open [room name]', 'close [room name]'");
-			System.out.print("Enter command: ");
 			
 			String instruction = System.console().readLine();
 			String[] instruction_split = instruction.split(" ");

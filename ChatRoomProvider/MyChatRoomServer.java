@@ -60,6 +60,7 @@ public class MyChatRoomServer extends UnicastRemoteObject implements ChatRoomSer
 		for (ChatClient client: clients) {
 			if (client.getName().equals(clientName)) {
 				clients.remove(client);
+				//talk(name + ": " + client.getName() + " has left the room.");
 				System.out.println("\n" + name + ": " + client.getName() + " has left the room.");
 				return 0;
 			}
