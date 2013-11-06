@@ -26,6 +26,7 @@ public class MyChatRoomServer extends UnicastRemoteObject implements ChatRoomSer
 		}
 		// Add client to list
 		clients.add(client);
+		System.out.println("\n" + name + ": " + client.getName() + " has joined the room.");
 		return 0;
 	}
 
@@ -42,6 +43,7 @@ public class MyChatRoomServer extends UnicastRemoteObject implements ChatRoomSer
 		for (ChatClient client: clients) {
 			client.receiveMessage(name, clientName + ": " + message);
 		}
+		System.out.println("\n" + name + ": " + clientName + " sent a message: " + message + ".");
 		return 0;
 	}
 
@@ -58,6 +60,7 @@ public class MyChatRoomServer extends UnicastRemoteObject implements ChatRoomSer
 		for (ChatClient client: clients) {
 			if (client.getName().equals(clientName)) {
 				clients.remove(client);
+				System.out.println("\n" + name + ": " + client.getName() + " has left the room.");
 				return 0;
 			}
 		}
@@ -79,6 +82,12 @@ public class MyChatRoomServer extends UnicastRemoteObject implements ChatRoomSer
 		}
 		return false;
 		
+	}
+
+	@Override
+	public boolean hasClient() throws RemoteException {
+		if (clients.isEmpty()) return false;
+		else return true;
 	}
 
 }

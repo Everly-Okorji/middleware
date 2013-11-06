@@ -11,6 +11,8 @@ public interface ChatRoomServer extends Remote {
 	
 	int leave(String clientName) throws RemoteException;
 	
+	boolean hasClient() throws RemoteException;
+	
 	String getName() throws RemoteException;
 	
 }

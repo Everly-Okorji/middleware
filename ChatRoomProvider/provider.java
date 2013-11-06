@@ -32,7 +32,10 @@ public class provider {
 			String[] instruction_split = instruction.split(" ");
 			
 			if (instruction_split == null) continue;
-			if (instruction_split.length != 2) continue;
+			if (instruction_split.length != 2) {
+				System.err.println("Command must be followed by a name, with no whitespace in room name!");
+				continue;
+			}
 			
 			if ("open".equals(instruction_split[0])) {
 				int code = x.openChatRoom(instruction_split[1]);

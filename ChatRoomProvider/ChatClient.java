@@ -22,8 +22,10 @@ public interface ChatClient extends Remote {
 	
 	int receiveMessage(String room, String message) throws RemoteException;
 	
-	public void printMessage() throws RemoteException;
+	void printMessage() throws RemoteException;
 	
-	int quit() throws RemoteException;
+	void quit() throws RemoteException;
+
+	int checkJoinedRoom(String roomname) throws RemoteException;
 	
 }

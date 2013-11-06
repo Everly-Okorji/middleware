@@ -32,18 +32,26 @@ public class MyChatRoomProvider implements ChatRoomProvider {
 
 	@Override
 	public int closeChatRoom(String room_name) throws RemoteException {
+		ChatRoomServer room = null;
+		for (ChatRoomServer chatroom: chatRooms) {
+			if (chatroom.getName().equals(room_name)) {
+				room = chatroom;
+				break;
+			}
+		}
+		if (room.hasClient()) return 10;
 		
 		int result = registry.deregister(room_name, ChatRegistry.Type.CHATROOM);
 		// Check if registry was successful
 		if (result == 0) {
 			// Find room
-			ChatRoomServer room = null;
+/*			ChatRoomServer room = null;
 			for (ChatRoomServer chatroom: chatRooms) {
 				if (chatroom.getName().equals(room_name)) {
 					room = chatroom;
 					break;
 				}
-			}
+			}*/
 			// Remove room
 			chatRooms.remove(room);
 			return 0;
