@@ -8,7 +8,6 @@ import java.util.List;
 public class client {
 
 	public static void main(String[] args) throws RemoteException {
-		Thread messageOutputThread;
 		String host = args[0];
 		
 		ChatClient x = null;
@@ -73,75 +72,101 @@ public class client {
 				continue;
 			}
 			
-			if ((inChatRoomFlag==false) && (userInput.substring(0, 4).equals("cmd-")==false)) {
-				System.err.println("Invalid command: " + userInput + ". Please enter cmd-* where * is a single claracter.");
-				continue;
+			if (inChatRoomFlag==false){
+				if (userInput.length()<5) {
+					System.err.println("Invalid command: " + userInput + ". Please enter cmd-* where * is a single claracter.");
+					continue;
+				}
+				else if (userInput.substring(0, 4).equals("cmd-")==false){
+					System.err.println("Invalid command: " + userInput + ". Please enter cmd-* where * is a single claracter.");
+					continue;
+				}
 			}
 			
-			if (userInput.substring(0, 4).equals("cmd-") && userInput.length()==5){
-				switch (userInput.charAt(4)){
-				case 'm':
-					printMenu();
-					break;
-				case 'f': 
-					List<String> chatRooms=x.findAvailableChatRooms();
-					
-					System.out.println("Available Chat Rooms: ");
-					// Print the chat room names from the list
-			        for(String chatRoom : chatRooms) {
-			            System.out.println(chatRoom);
-			        }
-			        System.out.println("");
-			        // Or like this
-//			        for(int i = 0; i < chatRooms.size(); i++) {
-//			            System.out.println(chatRooms.get(i));
-//			        }
-					break;
-					
-				case 'j': 
-					System.out.print("Please enter chat room you want to join: ");
-					String chatRoomNameJoin=System.console().readLine();
-					x.joinChatRoom(chatRoomNameJoin);
-					break;
-					
-				case 'l':
-					System.out.println("Please enter the name of the chat room you want to leave:");
-					String chatRoomNameLeave=System.console().readLine();
-					if (x.leaveChatRoom(chatRoomNameLeave) != 0) {
-						System.out.println("Cannot leave chat room "+chatRoomNameLeave+".");
+			if (userInput.length()>=5){
+				if (userInput.substring(0, 4).equals("cmd-") && userInput.length()>=5){
+					switch (userInput.charAt(4)){
+					case 'm':
+						if (userInput.length()==5){ 
+							printMenu();
+							break;
+						}
+					case 'f': 
+						if (userInput.length()==5){
+							List<String> chatRooms=x.findAvailableChatRooms();
+							
+							System.out.println("Available Chat Rooms: ");
+							// Print the chat room names from the list
+							for(String chatRoom : chatRooms) {
+								System.out.println(chatRoom);
+							}
+							System.out.println("");
+							// Or like this
+		//			        for(int i = 0; i < chatRooms.size(); i++) {
+		//			            System.out.println(chatRooms.get(i));
+		//			        }
+							break;
+						}
+					case 'j': 
+						if (userInput.length()==5){
+							System.out.print("Please enter chat room you want to join: ");
+							String chatRoomNameJoin=System.console().readLine();
+							x.joinChatRoom(chatRoomNameJoin);
+							break;
+						}
+					case 'l':
+						if (userInput.length()==5){
+							System.out.println("Please enter the name of the chat room you want to leave:");
+							String chatRoomNameLeave=System.console().readLine();
+							if (x.leaveChatRoom(chatRoomNameLeave) != 0) {
+								System.out.println("Cannot leave chat room "+chatRoomNameLeave+".");
+							}
+							else{
+								if (chatRoomNameLeave==currentChatRoom) inChatRoomFlag=false;
+							}
+							break;
+						}
+					case 'c':
+						if (userInput.length()==5){
+							
+							System.out.println("Please enter the name of the chat room you want to choose to send message:");
+							String chatRoomNameChose=System.console().readLine();
+							
+							
+							if (x.checkJoinedRoom(chatRoomNameChose)!=0) {
+								System.out.println("Chat room '" + chatRoomNameChose + "' is not a joined room!");
+								continue;
+							}
+							else{
+								currentChatRoom=chatRoomNameChose;
+								inChatRoomFlag = true;
+								System.out.println("Now you can send message to chat room "+chatRoomNameChose+".");
+							}
+							break;
+						}
+					case 'q':
+						if (userInput.length()==5){
+							x.quit();
+							break;
+						}
+					default:
+						if (inChatRoomFlag==false) {
+							System.err.println("Invalid command: " + userInput + ". Please enter cmd-* where * is a single claracter.");
+							continue;
+						}
+						if (x.sendMessage(currentChatRoom, userInput)==1){
+							System.out.println("Cannot send message to chat room "+currentChatRoom+".");
+						}
+						break;
 					}
-					else{
-						if (chatRoomNameLeave==currentChatRoom) inChatRoomFlag=false;
-					}
-					break;
-					
-				case 'c':
-					System.out.println("Please enter the name of the chat room you want to choose to send message:");
-					String chatRoomNameChose=System.console().readLine();
-					
-					
-					if (x.checkJoinedRoom(chatRoomNameChose)!=0) {
-						System.out.println("Chat room '" + chatRoomNameChose + "' is not a joined room!");
-						continue;
-					}
-					else{
-						currentChatRoom=chatRoomNameChose;
-						inChatRoomFlag = true;
-						System.out.println("Now you can send message to chat room "+chatRoomNameChose+".");
-					}
-					break;
-				case 'q':
-					x.quit();
-					break;
-				default:
+				}else {	
 					if (inChatRoomFlag==false) {
-						System.out.println("Please specify a chat room first before sending message.");
+						System.out.println("Please specify a chat room to send message, or enter a valid command.");
 						continue;
 					}
 					if (x.sendMessage(currentChatRoom, userInput)==1){
 						System.out.println("Cannot send message to chat room "+currentChatRoom+".");
 					}
-					break;
 				}
 			}
 			else {	

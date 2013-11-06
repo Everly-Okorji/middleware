@@ -152,11 +152,12 @@ public class MyChatClient extends UnicastRemoteObject implements ChatClient{
 	@Override
 	public int receiveMessage(String room, String message) {
 		String temp="";
-		temp.concat("[");
-		temp.concat(room);
-		temp.concat("]:");
-		temp.concat(message);
+		temp=temp.concat("[");
+		temp=temp.concat(room);
+		temp=temp.concat("]:");
+		temp=temp.concat(message);
 		messageQueue.add(temp);
+		//System.out.println(temp);
 		return 0;
 	}
 
