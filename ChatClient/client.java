@@ -5,12 +5,20 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.List;
 
-public class client {
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
+public class client {
+	
+	public static ChatClient x;
 	public static void main(String[] args) throws RemoteException {
+		
+		if (args.length != 1) {
+			System.out.println("Please enter a single argument (i.e. hostname of your registy)!");
+			System.exit(0);
+		}
 		String host = args[0];
 		
-		ChatClient x = null;
 		ChatRegistry stub = null;
 		
 		try {
@@ -50,6 +58,15 @@ public class client {
 		
 		System.out.println("Welcome, " + name + "!");
 		
+		// Launch the user interface
+		SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                 //Turn off metal's use of bold fonts
+		UIManager.put("swing.boldMetal", Boolean.FALSE);
+		UserInterface.createAndShowGUI();
+            }
+        });
+		
 		printMenu();
 		
 		String userInput;
@@ -63,8 +80,11 @@ public class client {
 		});
 		messageOutputThread.start();*/
 		boolean inChatRoomFlag=false;
+		UserInterface.inChatRoom = false;
+		
 		while (true) {			
 			//x.printMessage();
+			
 			System.out.print("Enter: ");
 			userInput=System.console().readLine();
 			
@@ -109,25 +129,37 @@ public class client {
 						}
 					case 'j': 
 						if (userInput.length()==5){
+							
+							x.printJoinedRooms();
+							
 							System.out.print("Please enter chat room you want to join: ");
 							String chatRoomNameJoin=System.console().readLine();
 							x.joinChatRoom(chatRoomNameJoin);
+							System.out.println("Use cmd-c to choose a chat room where you want to chat.");
 							break;
 						}
 					case 'l':
 						if (userInput.length()==5){
+							
+							x.printJoinedRooms();
+						
 							System.out.println("Please enter the name of the chat room you want to leave:");
 							String chatRoomNameLeave=System.console().readLine();
 							if (x.leaveChatRoom(chatRoomNameLeave) != 0) {
 								System.out.println("Cannot leave chat room "+chatRoomNameLeave+".");
 							}
 							else{
-								if (chatRoomNameLeave==currentChatRoom) inChatRoomFlag=false;
+								if (chatRoomNameLeave==currentChatRoom) {
+									inChatRoomFlag=false;
+									UserInterface.inChatRoom = false;
+								}
 							}
 							break;
 						}
 					case 'c':
 						if (userInput.length()==5){
+							
+							x.printJoinedRooms();
 							
 							System.out.println("Please enter the name of the chat room you want to choose to send message:");
 							String chatRoomNameChose=System.console().readLine();
@@ -139,7 +171,9 @@ public class client {
 							}
 							else{
 								currentChatRoom=chatRoomNameChose;
+								UserInterface.currentRoom = chatRoomNameChose;
 								inChatRoomFlag = true;
+								UserInterface.inChatRoom = true;
 								System.out.println("Now you can send message to chat room "+chatRoomNameChose+".");
 							}
 							break;

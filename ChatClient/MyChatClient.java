@@ -3,8 +3,6 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 
 public class MyChatClient extends UnicastRemoteObject implements ChatClient{
@@ -12,7 +10,6 @@ public class MyChatClient extends UnicastRemoteObject implements ChatClient{
 	ChatRegistry registry;
 	List <ChatRoomServer>  joinedRooms;
 	String clientName;
-	BlockingQueue<String> messageQueue;
 	
 	Thread messageOutputThread;
 	
@@ -20,34 +17,7 @@ public class MyChatClient extends UnicastRemoteObject implements ChatClient{
 		this.registry = registry;
 		this.clientName=name;
 		this.joinedRooms=new ArrayList<ChatRoomServer>();
-		this.messageQueue = new LinkedBlockingQueue<String>();
 		
-		messageOutputThread=new Thread(new Runnable () {
-			@Override
-			public void run() {
-				while (true) {
-					try {
-						printMessage();
-					} catch (RemoteException e) {
-
-					}
-				}
-			}
-		});
-		messageOutputThread.start();
-		
-	}
-	
-	@Override
-	public int checkJoinedRoom(String roomname) throws RemoteException{
-		for(ChatRoomServer chatRoom : joinedRooms) {
-            if (chatRoom.getName().equals(roomname)){
-            	System.out.println("Found joined chat room "+roomname+".");
-            	return 0;
-            }
-        }
-		System.out.println("Can not find joined chat room "+roomname+".");
-		return 1;
 	}
 	
 	@Override
@@ -156,7 +126,7 @@ public class MyChatClient extends UnicastRemoteObject implements ChatClient{
 		temp=temp.concat(room);
 		temp=temp.concat("]:");
 		temp=temp.concat(message);
-		messageQueue.add(temp);
+		UserInterface.queueMessage(temp);
 		//System.out.println(temp);
 		return 0;
 	}
@@ -166,11 +136,25 @@ public class MyChatClient extends UnicastRemoteObject implements ChatClient{
 		return clientName;
 	}
 	
-	public void printMessage() throws RemoteException {
-		try {
-			System.out.println(messageQueue.take());
-		} catch (InterruptedException e) {
-			System.err.println("InterruptedException found while printing message.");
-		}
+	//Check if the client is in the specific chat room
+	@Override
+	public int checkJoinedRoom(String roomname) throws RemoteException{
+		for(ChatRoomServer chatRoom : joinedRooms) {
+            if (chatRoom.getName().equals(roomname)){
+            	System.out.println("Found joined chat room "+roomname+".");
+            	return 0;
+            }
+        }
+		System.out.println("Can not find joined chat room "+roomname+".");
+		return 1;
+	}
+	
+	//Print out the list of chat rooms the client has joined
+	@Override
+	public void printJoinedRooms() throws RemoteException {
+		System.out.println("The list of your current joined chat rooms:");
+		for(ChatRoomServer chatRoom : joinedRooms) {
+            System.out.println("chat room: "+chatRoom.getName());
+        }		
 	}
 }
