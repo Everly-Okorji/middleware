@@ -47,6 +47,14 @@ public class client {
 			System.out.print("Please enter a username: ");
 			name = System.console().readLine();
 
+			if (name == null) {
+				continue;
+			}
+			
+			if (name.isEmpty()) {
+				continue;
+			}
+			
 			x = new MyChatClient(stub, name);
 			result = x.regChatClient();
 			if (result != 0) {
