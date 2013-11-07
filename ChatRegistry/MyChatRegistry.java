@@ -3,12 +3,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 
+ * This is the implementation of the ChatRegistry interface.
  * @author Everly, Zirui
  *
  */
 public class MyChatRegistry implements ChatRegistry {
 
+	// List of all registered chat rooms and clients
 	List<ChatRoomServer> rooms;
 	List<ChatClient> clients;
 	
@@ -21,6 +22,7 @@ public class MyChatRegistry implements ChatRegistry {
 	// ---------------- PRIVATE METHODS -----------------
 	
 	/**
+	 * This function checks if a given name is available for use (i.e. not taken)
 	 * @param room_name
 	 * @return true if room name is vacant, false otherwise
 	 * @throws RemoteException 
@@ -36,6 +38,7 @@ public class MyChatRegistry implements ChatRegistry {
 	}
 	
 	/**
+	 * This function checks to see if a client name is available to be used
 	 * @param client_name
 	 * @return true if client name is vacant, false otherwise
 	 * @throws RemoteException 
@@ -93,6 +96,7 @@ public class MyChatRegistry implements ChatRegistry {
 			// If name exists in the list, remove object from list
 			if (!roomNameAvailable(room_name)) {
 				ChatRoomServer room = null;
+				// Find the room which the provider wants to deregister
 				for (ChatRoomServer chatroom: rooms) {
 					if (chatroom.getName().equals(room_name)) {
 						room = chatroom;
@@ -115,6 +119,8 @@ public class MyChatRegistry implements ChatRegistry {
 			// If name is in client list, fetch object and remove from list
 			if (!clientNameAvailable(client_name)) {
 				ChatClient client = null;
+				
+				// Find the client object to be deregistered
 				for (ChatClient c: clients) {
 					if (c.getName().equals(client_name)) {
 						client = c;
