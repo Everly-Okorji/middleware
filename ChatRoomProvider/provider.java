@@ -42,7 +42,7 @@ public class provider {
 		// Wait for user input, then perform appropriate function
 		while (true) {
 			
-			System.out.println("\nSupported commands: 'open [room name]', 'close [room name]'");
+			System.out.println("\nSupported commands: 'open [room name]', 'close [room name]', 'end' (to terminate program)");
 			String instruction = System.console().readLine();
 			String[] instruction_split = instruction.split(" ");
 			
