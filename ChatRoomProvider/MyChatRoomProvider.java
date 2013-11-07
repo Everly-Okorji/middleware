@@ -27,7 +27,7 @@ public class MyChatRoomProvider implements ChatRoomProvider {
 			chatRooms.add(room);
 			return 0;
 		}
-		System.err.println("Could not open chat room with name '" + room_name + "'. Error code was " + result);
+		System.err.println("Could not open chat room with name '" + room_name + "'!");
 		return result;
 	}
 
@@ -40,6 +40,12 @@ public class MyChatRoomProvider implements ChatRoomProvider {
 				break;
 			}
 		}
+		
+		if (room == null) {
+			System.err.println("This room doesn't exist or you do not have permissions to deregister!");
+			return 9;
+		}
+		
 		if (room.hasClient()) {
 			System.out.println("Cannot close '" + room_name + "' as the room is not empty!");
 			return 10;
