@@ -67,17 +67,27 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
+/**
+ * This class was derived from the code here, and then edited to suit our purpose:
+ * http://docs.oracle.com/javase/tutorial/displayCode.html?code=http://docs.oracle.com/javase/tutorial/uiswing/examples/components/TextSamplerDemoProject/src/components/TextSamplerDemo.java
+ * @author Everly (via Java's example code)
+ *
+ */
 public class UserInterface extends JPanel
                              implements ActionListener {
 	
+	// Declare useful variables
     protected static final String textFieldString = "Enter: ";
     protected JLabel actionLabel;
     protected JEditorPane editorPane;
     private static BlockingQueue<String> messageQueue = new LinkedBlockingQueue<String>();
    
-	static String currentRoom = null;
-	static boolean inChatRoom = false;
+	static String currentRoom = null;	// Keeps track of the current chat room
+	static boolean inChatRoom = false;	// True if user is allowed to chat to a room
 
+	/**
+	 * Constructor
+	 */
     public UserInterface() {
     	
         setLayout(new BorderLayout());
@@ -147,6 +157,9 @@ public class UserInterface extends JPanel
         
         add(pane, BorderLayout.LINE_START);
         
+        // Run the thread to constantly fetch messages from other users in the
+        // same chat room which have been added to a message queue, and add these
+        // messages to the chat screen
         new Thread(new Runnable () {
 			@Override
 			public void run() {
@@ -262,10 +275,19 @@ public class UserInterface extends JPanel
     }
     */
     
+    /**
+     * This method is used to add a new message to the chat screen
+     * @param message
+     */
     public void addMessage (String message) {
     	editorPane.setText(editorPane.getText() + message + "\n");
     }
     
+    /**
+     * This method is used to add incoming messages from other clients in the same room
+     * onto a message queue
+     * @param message
+     */
     static void queueMessage (String message) {
     	try {
 			messageQueue.put(message);

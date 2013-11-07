@@ -5,11 +5,17 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This is the implementation of the chat room server requirement in the assignment
+ * specifications. Here, the chat room can add or remove a chat client, and can send out
+ * chat messages to all members of the room
+ * @author Everly
+ *
+ */
 public class MyChatRoomServer extends UnicastRemoteObject implements ChatRoomServer {
 	
 	String name;
 	List<ChatClient> clients;
-	
 	
 	public MyChatRoomServer(String name) throws RemoteException {
 		this.name = name;

@@ -3,7 +3,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 
+ * This is the implementation of the chat room provider requirement in the 
+ * specifications. This is where a chat room is opened or closed.
  * @author Everly Okorji
  *
  */
