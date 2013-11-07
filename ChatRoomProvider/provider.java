@@ -46,6 +46,10 @@ public class provider {
 			String instruction = System.console().readLine();
 			String[] instruction_split = instruction.split(" ");
 			
+			if ("end".equals(instruction)) {
+				System.exit(0);
+			}
+			
 			// Check for invalid input and print message if necessary
 			if (instruction_split == null) continue;
 			if (instruction_split.length != 2) {

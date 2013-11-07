@@ -40,7 +40,10 @@ public class MyChatRoomProvider implements ChatRoomProvider {
 				break;
 			}
 		}
-		if (room.hasClient()) return 10;
+		if (room.hasClient()) {
+			System.out.println("Cannot close '" + room_name + "' as the room is not empty!");
+			return 10;
+		}
 		
 		int result = registry.deregister(room_name, ChatRegistry.Type.CHATROOM);
 		// Check if registry was successful
@@ -57,7 +60,7 @@ public class MyChatRoomProvider implements ChatRoomProvider {
 			chatRooms.remove(room);
 			return 0;
 		}
-		System.err.println("Could not close chat room with name '" + room_name + "'. Error code was " + result);
+		System.err.println("Could not close chat room with name '" + room_name + "' because the deregister method failed. Error code was " + result);
 		return result;
 
 	}
