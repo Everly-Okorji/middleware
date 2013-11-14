@@ -19,10 +19,16 @@ public class MyPoll implements Poll {
 		this.creator=creator;
 		this.status=status;
 		this.possible_times=possibleTimes;
+		this.members=new ArrayList<String>();
 	}
 
 	@Override
-	public void addMembers(List<String> members) {
+	public void addAMember(String member) {
+		this.members.add(member);		
+	}
+	
+	@Override
+	public void setMembers(List<String> members) {
 		this.members=members;		
 	}
 

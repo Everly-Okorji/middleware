@@ -3,8 +3,6 @@ import java.util.List;
 
 public interface Client {
 
-	List<String> getClientsList();
-	
 	/*--------------------REQUESTER-------------------*/
 	
 	/**

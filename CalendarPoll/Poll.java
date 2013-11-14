@@ -3,10 +3,12 @@ import java.util.List;
 
 public interface Poll {
 
-	void addMembers(List<String> members);
+	void addAMember(String member);
+
+	void setMembers(List<String> members);
 	
 	void setOpen();
 	
 	void setFinalized();
-	
+
 }

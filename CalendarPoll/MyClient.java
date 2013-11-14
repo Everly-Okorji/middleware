@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -5,22 +6,21 @@ public class MyClient implements Client {
 
 	String name;
 	
+	List<String> clientList;
+	
 	List<Poll> polls;
 	
-	MyClient (String name) {
-		// TODO
+	MyClient (String name, List<String> clientList) { 
+		this.name=name;
+		this.clientList=clientList;
+		this.polls=new ArrayList<Poll>();
 	}
-	
-	@Override
-	public List<String> getClientsList() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+
 	@Override
 	public void createPoll(String title, String message,
 			List<String> possibleTimes) {
-		// TODO Auto-generated method stub
-		
+		Poll p=new MyPoll(title, message, name, MyPoll.Status.INITIALIZED, possibleTimes);
+		polls.add(p);
 	}
 	@Override
 	public void sendPoll(String title, List<String> members) {
