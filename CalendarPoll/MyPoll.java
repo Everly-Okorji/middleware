@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 public class MyPoll implements Poll {
@@ -13,24 +14,27 @@ public class MyPoll implements Poll {
 	List<String> members;
 	
 	MyPoll(String title, String message, String creator, Status status, List<String> possibleTimes) {
-		// TODO
+		this.title=title;
+		this.message=message;
+		this.creator=creator;
+		this.status=status;
+		this.possible_times=possibleTimes;
 	}
 
 	@Override
 	public void addMembers(List<String> members) {
-		// TODO Auto-generated method stub
-		
+		this.members=members;		
 	}
 
 	@Override
 	public void setOpen() {
-		// TODO Auto-generated method stub
+		status=Status.OPEN;
 		
 	}
 
 	@Override
 	public void setFinalized() {
-		// TODO Auto-generated method stub
+		status=Status.FINALIZED;
 		
 	}
 	

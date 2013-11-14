@@ -12,7 +12,10 @@ public class Response {
 	List<RespType> responses;
 	
 	Response(String poll_name, String replier, List<String> possible_times, List<RespType> responses) {
-		// TODO
+		this.poll_name=poll_name;
+		this.replier=replier;
+		this.possible_times=possible_times;
+		this.responses=responses;
 	}
 
 }
