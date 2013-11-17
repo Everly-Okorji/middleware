@@ -35,9 +35,48 @@ public class MyMessageHandler implements MessageHandler {
 		handleResponses();
 		
 	}
+
+	@Override
+	public void addNewListener(String poll_name, TemporaryQueue tempQueue) {
+		if (poll_name == null) {
+			System.err.println("Poll name for listener is null!");
+			return;
+		}
+		if (tempQueue == null) {
+			System.err.println("Temporary queue to be added is null!");
+			return;
+		}
+		if (listeners.containsKey(poll_name)) {
+			System.err.println("Poll name already has an existing message listener associated with it!");
+			return;
+		}
+		
+		listeners.put(poll_name, tempQueue);
+		
+		receiveMessages(poll_name);
+	}
 	
 	@Override
-	public void receiveMessages(final String poll_name) {
+	public void stopListening(String poll_name) throws JMSException {
+		if (!listeners.containsKey(poll_name)) {
+			System.out.println("Poll name does not have an associated temporary queue!");
+			return;
+		}
+		if (!listeners.containsKey(poll_name)) {
+			System.out.println("Poll name has not started listening to its message queue!");
+			return;
+		}
+		
+		// Stop the thread that is listening, and delete the temporary queue
+		listenThreads.get(poll_name).stop();
+		listeners.get(poll_name).delete();
+		
+		// Remove the stopped thread and deleted queue from the map
+		listenThreads.remove(poll_name);
+		listeners.remove(poll_name);
+	}
+	
+	private void receiveMessages(final String poll_name) {
 		
 		Thread listen_thread = new Thread(new Runnable() {
 			@Override
@@ -66,9 +105,9 @@ public class MyMessageHandler implements MessageHandler {
 						}
 						
 					} catch (NamingException e) {
-						e.printStackTrace();
+						System.out.println("Naming exception found while attempting to listen for poll '" + poll_name + "'!");
 					} catch (JMSException e) {
-						e.printStackTrace();
+						System.out.println("JMS exception found while attempting to listen for poll '" + poll_name + "'!");
 					}
 				} else {
 					System.err
@@ -80,24 +119,6 @@ public class MyMessageHandler implements MessageHandler {
 		listenThreads.put(poll_name, listen_thread);
 		listenThreads.get(poll_name).start();
 		
-	}
-
-	@Override
-	public void addNewListener(String poll_name, TemporaryQueue tempQueue) {
-		if (poll_name == null) {
-			System.err.println("Poll name for listener is null!");
-			return;
-		}
-		if (tempQueue == null) {
-			System.err.println("Temporary queue to be added is null!");
-			return;
-		}
-		if (listeners.containsKey(poll_name)) {
-			System.err.println("Poll name already has an existing message listener associated with it!");
-			return;
-		}
-		
-		listeners.put(poll_name, tempQueue);
 	}
 	
 	private void handleResponses() {
@@ -118,26 +139,6 @@ public class MyMessageHandler implements MessageHandler {
 			}
 		}
 		
-	}
-
-	@Override
-	public void stopListening(String poll_name) throws JMSException {
-		if (!listeners.containsKey(poll_name)) {
-			System.out.println("Poll name does not have an associated temporary queue!");
-			return;
-		}
-		if (!listeners.containsKey(poll_name)) {
-			System.out.println("Poll name has not started listening to its message queue!");
-			return;
-		}
-		
-		// Stop the thread that is listening, and delete the temporary queue
-		listenThreads.get(poll_name).stop();
-		listeners.get(poll_name).delete();
-		
-		// Remove the stopped thread and deleted queue from the map
-		listenThreads.remove(poll_name);
-		listeners.remove(poll_name);
 	}
 
 }
