@@ -8,6 +8,8 @@ public class User {
 	
 	static String user;
 	static Client client;
+	static MessageHandler mHandler;
+	static UserInterface ui;
 	
 	public static void main(String[] args) {
 		
@@ -28,8 +30,9 @@ public class User {
 		// Create client object
 		client = new MyClient(user, clientsList);
 		
-		new UserInterface();
-		new MyMessageHandler();
+		ui = new UserInterface();
+		mHandler = new MyMessageHandler();
+		
 	}
 
 }
