@@ -37,15 +37,14 @@
  */
 
 import java.awt.BorderLayout;              //for layout managers and more
-import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;        //for action events
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -62,8 +61,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 
 public class UserInterface extends JPanel
                              implements ActionListener {
@@ -86,15 +83,26 @@ public class UserInterface extends JPanel
     JPanel availabilityPane;
     
     protected static JEditorPane editorPane;
-    protected JLabel actionLabel;
+    
+    JComboBox<String> clientsListSelect;
     
     List<String> responses;
     List<String> availability;
     List<JRadioButton> yesRadioButtons;
     List<JRadioButton> maybeRadioButtons;
     List<JRadioButton> noRadioButtons;
+    
+    Set<String> recipients;
+    String newPollName;
+    Set<String> possibleTimes;
 
     public UserInterface() {
+    	
+    	recipients = new HashSet<String>();
+    	possibleTimes = new HashSet<String>();
+    	newPollName = "";
+    	
+    	availability = new ArrayList<String>();
     	
         setLayout(new BorderLayout());
 
@@ -105,8 +113,8 @@ public class UserInterface extends JPanel
         JScrollPane messagePane = new JScrollPane(editorPane);
         messagePane.setVerticalScrollBarPolicy(
                         JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        messagePane.setPreferredSize(new Dimension(250, 145));
-        messagePane.setMinimumSize(new Dimension(10, 10));
+        messagePane.setPreferredSize(new Dimension(400, 400));
+        messagePane.setMinimumSize(new Dimension(250, 145));
         messagePane.setBorder(
                 BorderFactory.createCompoundBorder(
                         BorderFactory.createTitledBorder("Messages"),
@@ -145,7 +153,7 @@ public class UserInterface extends JPanel
 
         //Create the combo box, select item at index 4.
         //Indices start at 0, so 4 specifies the pig.
-        JComboBox clientsListSelect = new JComboBox(User.clients);
+        clientsListSelect = new JComboBox<String>(User.clients);
         clientsListSelect.setSelectedIndex(0);
       	clientsListSelect.addActionListener(this);
 
@@ -165,29 +173,22 @@ public class UserInterface extends JPanel
         JLabel addMemberLabel = new JLabel(addMemberString + ": ");
         addMemberLabel.setLabelFor(clientsListSelect);
 
-        //Create a label to put messages during an action event.
-        actionLabel = new JLabel("Type text in a field and press Enter.");
-        actionLabel.setBorder(BorderFactory.createEmptyBorder(10,0,0,0));
-
         //Lay out the text controls and the labels.
         JPanel textControlsPane = new JPanel();
-        GridBagLayout gridbag = new GridBagLayout();
-        GridBagConstraints c = new GridBagConstraints();
-
-        textControlsPane.setLayout(gridbag);
-
-        JLabel[] labels = {titleLabel, descriptionLabel};
-        JTextField[] textFields = {titleTextField, descriptionTextField};
-        addLabelTextRows(labels, textFields, gridbag, textControlsPane);
-
-        c.gridwidth = GridBagConstraints.REMAINDER; //last
-        c.anchor = GridBagConstraints.WEST;
-        c.weightx = 1.0;
-        textControlsPane.add(actionLabel, c);
+        GridLayout grid = new GridLayout(0, 2);
+        grid.setHgap(5);
+        grid.setVgap(5);
+        
+        textControlsPane.setLayout(grid);
         textControlsPane.setBorder(
                 BorderFactory.createCompoundBorder(
                                 BorderFactory.createTitledBorder("Poll"),
                                 BorderFactory.createEmptyBorder(5,5,5,5)));
+        
+        textControlsPane.add(titleLabel);
+        textControlsPane.add(titleTextField);
+        textControlsPane.add(descriptionLabel);
+        textControlsPane.add(descriptionTextField);
         textControlsPane.add(clientsListSelect);
         textControlsPane.add(addAllButton);
         textControlsPane.add(addButton);
@@ -225,16 +226,6 @@ public class UserInterface extends JPanel
         maybeRadioButtons = new ArrayList<JRadioButton>();
         noRadioButtons = new ArrayList<JRadioButton>();
         
-        // TODO REMOVE!
-        availability = new ArrayList<String>();
-        availability.add("Monday");
-        availability.add("Tuesday");
-        availability.add("Wednesday");
-        availability.add("Thursday");
-        availability.add("Friday");
-        availability.add("Saturday");
-        availability.add("Sunday");
-        
         for (int i = 0; i < availability.size(); i++) {
         	
         	availabilityComponents.add(new JLabel(availability.get(i)));
@@ -265,7 +256,7 @@ public class UserInterface extends JPanel
 		responsePane.setBorder(BorderFactory.createCompoundBorder(
 				BorderFactory.createTitledBorder("Response"),
 				BorderFactory.createEmptyBorder(5, 5, 5, 5)));
-		responsePane.setPreferredSize(new Dimension(500, 200));
+		responsePane.setPreferredSize(new Dimension(500, 300));
 
 		responsePane.add(loadOptionsLabel);
 		responsePane.add(pollNameTextField);
@@ -277,34 +268,10 @@ public class UserInterface extends JPanel
        
         return responsePane;
     }
-    
-    private void addLabelTextRows(JLabel[] labels,
-                                  JTextField[] textFields,
-                                  GridBagLayout gridbag,
-                                  Container container) {
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.WEST;
-        int numLabels = labels.length;
-
-        for (int i = 0; i < numLabels; i++) {
-            c.gridwidth = GridBagConstraints.RELATIVE; //next-to-last
-            c.fill = GridBagConstraints.NONE;      //reset to default
-            c.weightx = 0.0;                       //reset to default
-            container.add(labels[i], c);
-
-            c.gridwidth = GridBagConstraints.REMAINDER;     //end row
-            c.fill = GridBagConstraints.HORIZONTAL;
-            c.weightx = 1.0;
-            container.add(textFields[i], c);
-        }
-    }
 
     public void actionPerformed(ActionEvent e) {
-        String prefix = "You typed \"";
-        if (titleString.equals(e.getActionCommand())) {
-            JTextField source = (JTextField)e.getSource();
-            actionLabel.setText(prefix + source.getText() + "\"");
-        } else if (addButtonString.equals(e.getActionCommand())) {
+    	
+        if (addButtonString.equals(e.getActionCommand())) {
         	executeAdd();
         } else if (addAllButtonString.equals(e.getActionCommand())) {
         	executeAddAll();
@@ -316,6 +283,7 @@ public class UserInterface extends JPanel
         	availabilityPane.setVisible(false);
         	executeSubmit();
         }
+        
     }
 
     private JEditorPane createEditorPane() {
@@ -329,7 +297,7 @@ public class UserInterface extends JPanel
      * this method should be invoked from the
      * event dispatch thread.
      */
-    private static void createAndShowGUI() {
+    static void createAndShowGUI() {
         //Create and set up the window.
         JFrame frame = new JFrame("Calendar Poll");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -351,21 +319,104 @@ public class UserInterface extends JPanel
     }
     
     private void executeAdd() {
-    	JOptionPane.showMessageDialog(this, "In the Execute Add method!");
+    	
+    	boolean itemsListReset = false;
+    	
+    	// Reset the container and poll name first
+    	if (!newPollName.equals(titleTextField.getText())) {
+    		newPollName = titleTextField.getText();
+    		recipients = new HashSet<String>();
+    		clientsListSelect.removeAllItems();
+    		for (String client: User.clients){
+    			clientsListSelect.addItem(client);
+    		}
+    		itemsListReset = true;
+    	}
+    	
+    	// Get the item
+    	String item;
+    	try {
+    		item = clientsListSelect.getSelectedItem().toString();
+    	} catch (NullPointerException e) {
+    		return;
+    	}
+    	
+		if (!itemsListReset) {
+			recipients.add(item);
+			clientsListSelect.removeItem(item);
+			addMessage("System: Added " + item + " to Poll '" + newPollName
+					+ "'");
+		}
     }
     
     private void executeAddAll() {
-    	JOptionPane.showMessageDialog(this, "In the Execute Add All method!");
+    	
+    	int size = clientsListSelect.getItemCount();
+    	if (size == 0) {
+    		return;
+    	}
+    	for (int i = 0; i < size; i++) {
+    		String item = clientsListSelect.getItemAt(0);
+    		recipients.add(item);
+    		clientsListSelect.removeItemAt(0);
+    	}
+    	addMessage("System: " + "Added all recipients to Poll '" + newPollName + "'");
     }
     
     private void executeSend() {
-    	JOptionPane.showMessageDialog(this, "In the Execute Send method!");
+    	
+    	String descr = descriptionTextField.getText();
+    	// TODO Error Check for all parameters!
+    	
+    	// Create poll
+    	List<String> myPossibleTimes = new ArrayList<String>();
+    	myPossibleTimes.addAll(possibleTimes);
+    	User.client.createPoll(newPollName, descr, myPossibleTimes);
+    	
+    	// Send poll
+    	List<String> recipientsList = new ArrayList<String>();
+    	recipientsList.addAll(recipients);
+    	User.client.sendPoll(newPollName, recipientsList);
+    	addMessage("System: Poll '" + newPollName + "' was sent to all specified recipients!");
+    	
+    	// Reset variables
+    	newPollName = "";
+    	recipients.clear();
+    	possibleTimes.clear();
+    	
+    	// Reset UI
+    	titleTextField.setText("");
+    	descriptionTextField.setText("");
+    	clientsListSelect.removeAllItems();
+    	for (String client: User.clients){
+			clientsListSelect.addItem(client);
+		}
+    	
     }
     
     private void executeLoadOptions() {
+    	
+    	if (pollNameTextField.getText().isEmpty()) {
+    		return;
+    	}
     	String poll_name = pollNameTextField.getText();
     	pollNameTextField.setText("");
+    	
+    	// TODO Get the possible meeting times for the poll, 
+    	// or return with an appropriate message.
+    	
+        // TODO REMOVE!
+    	// Load the options
+        availability.clear();
+        availability.add("Monday");
+        availability.add("Tuesday");
+        availability.add("Wednesday");
+        availability.add("Thursday");
+        availability.add("Friday");
+        availability.add("Saturday");
+        availability.add("Sunday");
     	availabilityPane.setVisible(true);
+    	
     	loadOptionsLabel.setText("Options for: " + poll_name);
     	pollNameTextField.setVisible(false);
     }
@@ -378,19 +429,6 @@ public class UserInterface extends JPanel
     	JOptionPane.showMessageDialog(this, "In the Execute Submit method!");
     	loadOptionsLabel.setText(loadOptionsPrompt);
     	pollNameTextField.setVisible(true);
-    }
-
-    public static void main(String[] args) {
-        //Schedule a job for the event dispatching thread:
-        //creating and showing this application's GUI.
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                 //Turn off metal's use of bold fonts
-		UIManager.put("swing.boldMetal", Boolean.FALSE);
-		createAndShowGUI();
-            }
-        });
-
     }
     
 }
