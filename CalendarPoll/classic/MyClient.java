@@ -254,12 +254,30 @@ public class MyClient implements Client {
 	
 	@Override
 	public Response createResponse(String poll_name, List<String> possible_times, List<RespType> responses) {
-		// TODO Check for null poll name and possible_times and responses
+		//Check for null poll name and possible_times and responses
 		if (poll_name==null){
-			System.err.println();
+			System.err.println("Cannot create response. The response's poll_name is null.");
 		}
 		
-		// TODO Check if poll is in received polls. If so, get possible times from there. if not, error.
+		if (possible_times==null){
+			System.err.println("Cannot create response. The response's possible_times is null.");
+		}
+		
+		if (responses==null){
+			System.err.println("Cannot create response. The response's responses is null.");
+		}
+		
+		//Check if poll is in received polls. If so, get possible times from there. if not, error.
+		boolean pollFound=false;
+		for (Poll pIterator: receivedPolls){
+			if (pIterator.getTitle().equals(poll_name)){
+				pollFound=true;
+			}
+		}
+		if (pollFound==false){
+			System.err.println("Cannot create response. The response's poll_name is not in the receivedPoll list.");
+		}
+		
 		
 		Response myResponse= new Response(poll_name, name, possible_times, responses);
 		return myResponse;
@@ -267,7 +285,15 @@ public class MyClient implements Client {
 	
 	@Override
 	public void sendResponse(String poll_name, Response response) {
-		// TODO Auto-generated method stub
+		
+		if (poll_name==null){
+			System.err.println("Cannot send response. The response's poll_name is null.");
+		}
+		
+		if (response==null){
+			System.err.println("Cannot send response. The response's response is null.");
+		}
+		
 		User.mHandler.sendResponse(poll_name, response);
 	}
 	
