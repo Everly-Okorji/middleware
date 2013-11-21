@@ -1,6 +1,5 @@
 package classic;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +11,6 @@ import javax.jms.ObjectMessage;
 import javax.jms.Queue;
 import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
-import javax.jms.QueueReceiver;
 import javax.jms.QueueSender;
 import javax.jms.QueueSession;
 import javax.jms.Session;
@@ -21,6 +19,8 @@ import javax.jms.TextMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+
+import classic.Response.RespType;
 
 
 public class MyClient implements Client {
@@ -38,6 +38,8 @@ public class MyClient implements Client {
 	static Context ictx=null;
 	QueueConnectionFactory qcf;
 	static Map<String, QueueConnection> openConnections;
+	
+	static List<Poll> receivedPolls=new ArrayList<Poll>();
 	
 	MyClient (String name, List<String> clientList) { 
 		this.name=name;
@@ -92,6 +94,8 @@ public class MyClient implements Client {
 		
 		Poll p=new MyPoll(title, message, name, MyPoll.Status.INITIALIZED, possibleTimes);
 		polls.add(p);
+		
+		UserInterface.addMessage("Poll '"+title+"' created.");
 	}
 	
 	@Override
@@ -144,6 +148,8 @@ public class MyClient implements Client {
 					msg.setObject(poll);
 					msg.setJMSReplyTo(tempQueue);
 					
+					
+					User.mHandler.addNewListener(poll.getTitle(), tempQueue);
 					sender.send(msg);
 				} catch (JMSException e) {
 					System.err.println("Message not sent! JMS Exception found.");
@@ -153,7 +159,7 @@ public class MyClient implements Client {
 				
 				poll.setOpen();
 
-				System.out.println("Poll sent!");
+				UserInterface.addMessage("Poll '"+ title+"' has been sent to person '"+person+"'.");
 
 			}
 		}
@@ -187,6 +193,8 @@ public class MyClient implements Client {
 		}
 		
 		poll.addResponse(response);
+		
+		UserInterface.addMessage("Response of poll '"+response.poll_name+"' received from person '"+response.replier+"'.");
 
 	}
 	
@@ -224,6 +232,7 @@ public class MyClient implements Client {
 				QueueSender sender;
 				sender = session.createSender(map.get(member));
 				sender.send(msg);
+				UserInterface.addMessage("Final meeting time of poll'"+poll_name+"' has been sent to person '"+member+"'.");
 			} catch (JMSException e) {
 				System.err.println("Final meeting time not sent! JMS Exception found.");
 				return;
@@ -231,23 +240,35 @@ public class MyClient implements Client {
 			
 		}
 		
+		UserInterface.addMessage("Poll '"+poll_name+"' has been closed");
+		
 	}
 	
 	@Override
 	public void receivePoll(Poll poll) {
-		//message.receiveMessage(poll);
-	}
-	
-	@Override
-	public Response setAvailability(List<String> availability) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	@Override
-	public void sendResponse(Response response) {
-		// TODO Auto-generated method stub
 		
+		receivedPolls.add(poll);
+		UserInterface.addMessage("New poll '"+poll.getTitle()+"' comes.");
+		
+	}
+	
+	@Override
+	public Response createResponse(String poll_name, List<String> possible_times, List<RespType> responses) {
+		// TODO Check for null poll name and possible_times and responses
+		if (poll_name==null){
+			System.err.println();
+		}
+		
+		// TODO Check if poll is in received polls. If so, get possible times from there. if not, error.
+		
+		Response myResponse= new Response(poll_name, name, possible_times, responses);
+		return myResponse;
+	}
+	
+	@Override
+	public void sendResponse(String poll_name, Response response) {
+		// TODO Auto-generated method stub
+		User.mHandler.sendResponse(poll_name, response);
 	}
 	
 }

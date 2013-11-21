@@ -3,6 +3,8 @@ package classic;
 import java.util.List;
 import java.util.Set;
 
+import classic.Response.RespType;
+
 
 public interface Client {
 
@@ -32,6 +34,7 @@ public interface Client {
 	/**
 	 * Set poll as finalized and send out message
 	 * @param poll_name
+	 * @param finalizedMeetingTime
 	 */
 	void closePoll(String poll_name, String finalizedMeetingTime);
 	
@@ -46,13 +49,16 @@ public interface Client {
 	
 	/**
 	 * Create the response object and set availability
+	 * @param poll_name
+	 * @param possible_times
+	 * @param responses
 	 * @return
 	 */
-	Response setAvailability(List<String> availability);
+	Response createResponse(String poll_name, List<String> possible_times, List<RespType> responses);
 	
 	/**
 	 * Send the response object back to creator of poll using temporary queue
 	 * @param response
 	 */
-	void sendResponse(Response response);
+	void sendResponse(String poll_name, Response response);
 }
