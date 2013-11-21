@@ -18,5 +18,19 @@ public interface MessageHandler {
 	 * @param poll_name
 	 */
 	void stopListening(String poll_name) throws JMSException;
+
+	/**
+	 * This method receives any messages (such as a new poll needing a response, or
+	 * a finalized message)
+	 */
+	void receiveMessagesOnMyQueue();
 	
+	/**
+	 * Given a poll name and response object, this method sends the response
+	 * to the temporary queue associated with the poll. (NOTE: This is a separate
+	 * map from that which associates queues with polls created by me (i.e. the user)).
+	 * @param poll_name
+	 * @param response
+	 */
+	void sendResponse(String poll_name, Response response);
 }

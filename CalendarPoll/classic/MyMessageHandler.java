@@ -25,16 +25,32 @@ public class MyMessageHandler implements MessageHandler {
 	Map<String, Thread> listenThreads;
 	
 	BlockingQueue<Response> responses;
+	BlockingQueue<Poll> polls;
 	
 	MyMessageHandler() {
 		listeners = new HashMap<String, TemporaryQueue>();
 		listenThreads = new HashMap<String, Thread>();
 		
 		responses = new LinkedBlockingQueue<Response>();
+		polls = new LinkedBlockingQueue<Poll>();
 		
 		// Wait for incoming responses and handle them.
-		handleResponses();
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				handleResponses();
+			}
+		}).start();
 		
+		// Wait for incoming polls and handle them.
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				handleIncomingPolls();
+			}
+		}).start();
+		
+		// TODO Also handle finalized poll messages
 	}
 
 	@Override
@@ -75,6 +91,18 @@ public class MyMessageHandler implements MessageHandler {
 		// Remove the stopped thread and deleted queue from the map
 		listenThreads.remove(poll_name);
 		listeners.remove(poll_name);
+	}
+	
+	@Override
+	public void receiveMessagesOnMyQueue() {
+		// TODO Auto-generated method stub
+	
+	}
+
+	@Override
+	public void sendResponse(String poll_name, Response response) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	private void receiveMessages(final String poll_name) {
@@ -141,5 +169,23 @@ public class MyMessageHandler implements MessageHandler {
 		}
 		
 	}
+	
+	private void handleIncomingPolls() {
+		boolean interruptFound = false;
+		while (!interruptFound) {
+			try {
+				Poll poll = polls.take();
+				System.out.println("From Message Handler: New Poll received! Poll name is' "
+						+ poll.getTitle() + "'.");
+				User.client.receivePoll(poll);;
+
+			} catch (InterruptedException e) {
+				System.out
+						.println("Blocking queue interrupted while waiting for polls!");
+				interruptFound = true;
+			}
+		}
+	}
+
 
 }

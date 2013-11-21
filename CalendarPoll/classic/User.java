@@ -1,5 +1,6 @@
 package classic;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -16,7 +17,7 @@ public class User {
 	static MessageHandler mHandler;
 	static UserInterface ui;
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		
 		// Fetch the clients list
 		List<String> clientsList = Arrays.asList(clients);
@@ -25,7 +26,19 @@ public class User {
 		user = null;
 		while (user == null) {
 			System.out.print("Please enter a name: ");
-			user = System.console().readLine();
+			
+			char ch = (char) System.in.read();
+			user = "";
+			
+			while (ch != '\n') {
+				user += ch;
+				ch = (char) System.in.read();
+			}
+			if (!user.isEmpty()) {
+				user = user.substring(0, user.length()-1);
+			}
+			
+			System.out.println(user);
 			user = user.toLowerCase();
 			if (!clientsList.contains(user.toLowerCase())) {
 				System.err.println(user + " is not a registered name!");
