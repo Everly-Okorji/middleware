@@ -1,11 +1,13 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 
+import javax.jms.JMSException;
 import javax.jms.ObjectMessage;
+import javax.jms.Queue;
 import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
 import javax.jms.QueueReceiver;
@@ -15,6 +17,7 @@ import javax.jms.Session;
 import javax.jms.TemporaryQueue;
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 
 public class MyClient implements Client {
@@ -34,24 +37,33 @@ public class MyClient implements Client {
 	MessageHandler message;
 	
 	static Context ictx=null;
+	QueueConnectionFactory qcf;
+	static Map<String, QueueConnection> openConnections;
 	
 	MyClient (String name, List<String> clientList) { 
 		this.name=name;
 		this.clientList=clientList;
 		this.polls=new ArrayList<Poll>();
+		this.pollMsg=new ArrayList<Poll>();
+		this.openConnections = new HashMap<String, QueueConnection>();
 		
-		pollMsg=new ArrayList<Poll>();
+		// Create a queue for each registered name
 		map = new HashMap<String, Queue>();
-		for (String people: peopleNames){
-			ictx = new InitialContext();
-		    Queue queue = (Queue) ictx.lookup(people);
-		    QueueConnectionFactory qcf = (QueueConnectionFactory) ictx.lookup("qcf");
-		    ictx.close();
-		    map.put(people, queue);
-		}
 		
-		message=new MyMessageHandler();
-				
+		try {
+			ictx = new InitialContext();
+			qcf = (QueueConnectionFactory) ictx.lookup("qcf");
+		    
+			for (String people: peopleNames){
+				 Queue queue = (Queue) ictx.lookup(people);	
+				 map.put(people, queue);
+			}
+			ictx.close();
+		} catch (NamingException e) {
+			System.err.println("Naming exception found at MyClient constructor");
+			System.exit(1);
+		} 
+	    
 	}
 
 	@Override
@@ -74,73 +86,55 @@ public class MyClient implements Client {
 				break;
 			}
 		}
+		
 		if (pollfound==false){
 			System.err.println("There is no such poll titled:"+title+".");
+			return;
 		}
-		else{
-			for (String people: peopleNames){
-				if (members.contains(people)){
-					Map.Entry<String, Queue> entry=null;
-					boolean peoplefound=false;
-					for (Map.Entry<String, Queue> eIterator : map.entrySet()) {
-						if (eIterator.getKey().equals(people)){
-							peoplefound=true;
-							entry=eIterator;
-							break;
-						}
+		
+		// Send poll to everyone in the poll list
+		for (String person : peopleNames) {
+			if (members.contains(person)) { // Person will be receiving message
+
+				try {
+					// Get the QueueConnection object, or create one if it does not exist
+					if (!openConnections.containsKey(person)) {
+						QueueConnection conn = qcf.createQueueConnection();
+						openConnections.put(person, conn);
 					}
-					if (peoplefound==false){
-						System.err.println("There is no such people named:"+people+".");
-					}
-					else{	
-						
-						
-						QueueConnection cnx = qcf.createQueueConnection();
-					    QueueSession session = cnx.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
-						
-						TemporaryQueue tempQueue = session.createTemporaryQueue();
-						QueueSender sender = session.createSender(entry.getValue());
-						QueueReceiver receiver = session.createReceiver(tempQueue);
-						cnx.start();
-						
-						ObjectMessage msg=poll;
-						msg.setJMSReplyTo(tempQueue);
-					    sender.send(msg);
-					    pollMsg.add(msg);
-					    
-					    System.out.println("Poll sent!");
-					    //cnx.close();  // when do we need this line???
-					    
-					}
+					QueueConnection cnx = openConnections.get(person);
+					QueueSession session = cnx.createQueueSession(false,
+							Session.AUTO_ACKNOWLEDGE);
+
+					TemporaryQueue tempQueue = session.createTemporaryQueue();
+					QueueSender sender = session.createSender(map.get(person));
+					cnx.start();
+
+					ObjectMessage msg = session.createObjectMessage();
+					msg.setObject(poll);
+					msg.setJMSReplyTo(tempQueue);
+					
+					sender.send(msg);
+				} catch (JMSException e) {
+					System.err.println("Message not sent! JMS Exception found.");
+					return;
 				}
+				
+				pollMsg.add(poll); // TODO Do we need this? NO?
+				
+				poll.setOpen();
+
+				System.out.println("Poll sent!");
+
 			}
 		}
-	}
-	
-	@Override
-	public Poll getPollResult(Poll poll) {
-		boolean pollfound=false;
-		Poll pollResult=null;
-		
-		for (Poll pIterator: polls){
-			if (pIterator.getTitle().equals(poll.getTitle())) {
-				pollResult=pIterator;
-				pollfound=true;
-				break;
-			}
-		}
-		if (pollfound==false){
-			System.err.println("There is no such poll titled:"+poll.getTitle()+".");
-			return null;
-		}
-		else{
-			return pollResult;
-		}
-		
+
 	}
 	
 	@Override
 	public void UpdatePollInfo(Response response) {
+		
+		// Poll response from message handler. Need to handle it
 		boolean pollfound=false;
 		Poll poll=null;
 		
@@ -151,11 +145,13 @@ public class MyClient implements Client {
 				break;
 			}
 		}
+		
 		if (pollfound==false){
 			System.err.println("There is no such poll titled:"+response.getPollName()+".");
 		}
 		else{
 			
+			// TODO Also check if the poll status is Status.OPEN before accepting responses
 		}
 		
 	}
@@ -183,7 +179,7 @@ public class MyClient implements Client {
 	
 	@Override
 	public void receivePoll(Poll poll) {
-		message.receiveMessage(poll);
+		//message.receiveMessage(poll);
 	}
 	
 	@Override

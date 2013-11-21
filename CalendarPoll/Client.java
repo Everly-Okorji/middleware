@@ -22,14 +22,6 @@ public interface Client {
 	void sendPoll(String title, Set<String> members);
 	
 	/**
-	 * Looks up a poll name and returns the corresponding object
-	 * @param sender
-	 * @param poll
-	 * @return
-	 */
-	Poll getPollResult(Poll poll);
-	
-	/**
 	 * Updates poll based on response
 	 * @param response
 	 */
@@ -44,7 +36,8 @@ public interface Client {
 	/*------------------ REPLIER ---------------------*/
 	
 	/**
-	 * Receives an open poll from the message handler and stores it somewhere
+	 * Receives an open poll (created by another client) from the message handler
+	 *  and stores it somewhere
 	 * @param poll
 	 */
 	void receivePoll(Poll poll);

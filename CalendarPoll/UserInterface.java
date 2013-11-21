@@ -374,9 +374,7 @@ public class UserInterface extends JPanel
     	User.client.createPoll(newPollName, descr, myPossibleTimes);
     	
     	// Send poll
-    	List<String> recipientsList = new ArrayList<String>();
-    	recipientsList.addAll(recipients);
-    	User.client.sendPoll(newPollName, recipientsList);
+    	User.client.sendPoll(newPollName, recipients);
     	addMessage("System: Poll '" + newPollName + "' was sent to all specified recipients!");
     	
     	// Reset variables
