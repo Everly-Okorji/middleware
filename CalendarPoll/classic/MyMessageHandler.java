@@ -1,3 +1,4 @@
+package classic;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;

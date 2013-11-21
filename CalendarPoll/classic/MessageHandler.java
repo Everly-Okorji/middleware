@@ -1,3 +1,4 @@
+package classic;
 import javax.jms.JMSException;
 import javax.jms.TemporaryQueue;
 

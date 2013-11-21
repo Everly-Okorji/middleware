@@ -1,3 +1,5 @@
+package classic;
+
 import java.util.List;
 import java.util.Set;
 
@@ -31,7 +33,7 @@ public interface Client {
 	 * Set poll as finalized and send out message
 	 * @param poll_name
 	 */
-	void closePoll(String poll_name);
+	void closePoll(String poll_name, String finalizedMeetingTime);
 	
 	/*------------------ REPLIER ---------------------*/
 	

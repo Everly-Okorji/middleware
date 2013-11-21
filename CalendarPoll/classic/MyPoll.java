@@ -1,11 +1,11 @@
+package classic;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class MyPoll implements Poll {
-
-	enum Status {INITIALIZED, OPEN, FINALIZED};
 	
 	String title;
 	String message;
@@ -75,6 +75,16 @@ public class MyPoll implements Poll {
 		}
 		
 		responses.add(response);
+	}
+
+	@Override
+	public Status getStatus() {
+		return status;
+	}
+
+	@Override
+	public Set<String> getMembers() {
+		return members;
 	}
 
 	

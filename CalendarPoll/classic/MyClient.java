@@ -1,3 +1,5 @@
+package classic;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +17,7 @@ import javax.jms.QueueSender;
 import javax.jms.QueueSession;
 import javax.jms.Session;
 import javax.jms.TemporaryQueue;
+import javax.jms.TextMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -30,8 +33,6 @@ public class MyClient implements Client {
 	
 	Map<String, Queue> map;
 	
-	List<Poll> pollMsg;
-	
 	MessageHandler message;
 	
 	static Context ictx=null;
@@ -42,7 +43,6 @@ public class MyClient implements Client {
 		this.name=name;
 		this.clientList=clientList;
 		this.polls=new ArrayList<Poll>();
-		this.pollMsg=new ArrayList<Poll>();
 		this.openConnections = new HashMap<String, QueueConnection>();
 		
 		// Create a queue for each registered name
@@ -67,6 +67,29 @@ public class MyClient implements Client {
 	@Override
 	public void createPoll(String title, String message,
 			List<String> possibleTimes) {
+		
+		if (title==null){
+			System.err.println("Cannot create this poll. The poll's title is 'null'.");
+			return;
+		}
+		
+		for (Poll pIterator:polls){
+			if (pIterator.getTitle().equals(title)){
+				System.err.println("Cannot create this poll. The poll title '"+title+"' is already used!");
+				return;
+			}
+		}
+		
+		if (message==null){
+			System.err.println("Cannot create this poll. The poll's message is 'null'.");
+			return;
+		}
+		
+		if (possibleTimes==null){
+			System.err.println("Cannot create this poll. The poll's possibleTimes is 'null'.");
+			return;
+		}
+		
 		Poll p=new MyPoll(title, message, name, MyPoll.Status.INITIALIZED, possibleTimes);
 		polls.add(p);
 	}
@@ -76,6 +99,11 @@ public class MyClient implements Client {
 		
 		boolean pollfound=false;
 		Poll poll=null;
+		
+		if (members==null){
+			System.err.println("Cannot send this poll. The poll's member is 'null'.");
+			return;
+		}
 		
 		for (Poll pIterator: polls){
 			if (pIterator.getTitle().equals(title)) {
@@ -89,6 +117,10 @@ public class MyClient implements Client {
 			System.err.println("There is no such poll titled:"+title+".");
 			return;
 		}
+		
+		//Add members to the poll
+		poll.setMembers(members);
+		
 		
 		// Send poll to everyone in the poll list
 		for (String person : User.clients) {
@@ -118,7 +150,6 @@ public class MyClient implements Client {
 					return;
 				}
 				
-				pollMsg.add(poll); // TODO Do we need this? NO?
 				
 				poll.setOpen();
 
@@ -146,16 +177,21 @@ public class MyClient implements Client {
 		
 		if (pollfound==false){
 			System.err.println("There is no such poll titled:"+response.getPollName()+".");
-		}
-		else{
-			
-			// TODO Also check if the poll status is Status.OPEN before accepting responses
+			return;
 		}
 		
+		//Check if the poll status is Poll.Status.OPEN before accepting responses
+		if (poll.getStatus()!=Poll.Status.OPEN){
+			System.err.println("The poll '"+response.poll_name+"' is not open.");
+			return;
+		}
+		
+		poll.addResponse(response);
+
 	}
 	
 	@Override
-	public void closePoll(String poll_name) {
+	public void closePoll(String poll_name, String finalizedMeetingTime) {
 		boolean pollfound=false;
 		Poll poll=null;
 		
@@ -171,6 +207,28 @@ public class MyClient implements Client {
 		}
 		else{
 			poll.setFinalized();
+		}
+		
+		String text=poll_name+finalizedMeetingTime;
+		
+		
+		Set<String> members=poll.getMembers();
+		for (String member:members){
+			try {
+				//TODO new session created, will there be any conflicts with the earlier created session to send poll?
+				QueueConnection cnx = openConnections.get(member);
+				QueueSession session = cnx.createQueueSession(false,
+						Session.AUTO_ACKNOWLEDGE);
+				TextMessage msg = session.createTextMessage();
+				msg.setText(text);
+				QueueSender sender;
+				sender = session.createSender(map.get(member));
+				sender.send(msg);
+			} catch (JMSException e) {
+				System.err.println("Final meeting time not sent! JMS Exception found.");
+				return;
+			}
+			
 		}
 		
 	}
@@ -191,5 +249,5 @@ public class MyClient implements Client {
 		// TODO Auto-generated method stub
 		
 	}
-
+	
 }
