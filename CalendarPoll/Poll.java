@@ -12,6 +12,8 @@ public interface Poll extends Serializable {
 	
 	void setFinalized();
 	
+	void addResponse(Response response);
+	
 	String getTitle();
 
 }

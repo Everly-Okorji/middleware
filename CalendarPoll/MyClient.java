@@ -30,8 +30,6 @@ public class MyClient implements Client {
 	
 	Map<String, Queue> map;
 	
-	List<String> peopleNames;//need to get input from file!!!
-	
 	List<Poll> pollMsg;
 	
 	MessageHandler message;
@@ -54,7 +52,7 @@ public class MyClient implements Client {
 			ictx = new InitialContext();
 			qcf = (QueueConnectionFactory) ictx.lookup("qcf");
 		    
-			for (String people: peopleNames){
+			for (String people: User.clients){
 				 Queue queue = (Queue) ictx.lookup(people);	
 				 map.put(people, queue);
 			}
@@ -93,7 +91,7 @@ public class MyClient implements Client {
 		}
 		
 		// Send poll to everyone in the poll list
-		for (String person : peopleNames) {
+		for (String person : User.clients) {
 			if (members.contains(person)) { // Person will be receiving message
 
 				try {

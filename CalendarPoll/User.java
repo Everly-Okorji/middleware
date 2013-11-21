@@ -24,7 +24,7 @@ public class User {
 		while (user == null) {
 			System.out.print("Please enter a name: ");
 			user = System.console().readLine();
-			//user = "alice";
+			user = user.toLowerCase();
 			if (!clientsList.contains(user.toLowerCase())) {
 				System.err.println(user + " is not a registered name!");
 				user = null;
