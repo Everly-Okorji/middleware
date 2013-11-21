@@ -1,14 +1,16 @@
-import java.util.List;
+import java.util.Set;
 
 
 public interface Poll {
 
 	void addAMember(String member);
 
-	void setMembers(List<String> members);
+	void setMembers(Set<String> members);
 	
 	void setOpen();
 	
 	void setFinalized();
+	
+	String getTitle();
 
 }

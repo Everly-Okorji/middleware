@@ -18,4 +18,7 @@ public class Response {
 		this.responses=responses;
 	}
 
+	String getPollName(){
+		return poll_name;
+	}
 }

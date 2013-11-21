@@ -1,4 +1,5 @@
 import java.util.List;
+import java.util.Set;
 
 
 public interface Client {
@@ -18,7 +19,7 @@ public interface Client {
 	 * @param title
 	 * @param members
 	 */
-	void sendPoll(String title, List<String> members);
+	void sendPoll(String title, Set<String> members);
 	
 	/**
 	 * Looks up a poll name and returns the corresponding object
