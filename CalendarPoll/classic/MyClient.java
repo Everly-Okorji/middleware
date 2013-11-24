@@ -54,7 +54,7 @@ public class MyClient implements Client {
 			ictx = new InitialContext();
 			qcf = (QueueConnectionFactory) ictx.lookup("qcf");
 		    
-			for (String people: User.clients){
+			for (String people: User.other_clients){
 				 Queue queue = (Queue) ictx.lookup(people);	
 				 map.put(people, queue);
 			}
@@ -127,7 +127,7 @@ public class MyClient implements Client {
 		
 		
 		// Send poll to everyone in the poll list
-		for (String person : User.clients) {
+		for (String person : User.other_clients) {
 			if (members.contains(person)) { // Person will be receiving message
 
 				try {
@@ -248,7 +248,7 @@ public class MyClient implements Client {
 	public void receivePoll(Poll poll) {
 		
 		receivedPolls.add(poll);
-		UserInterface.addMessage("New poll '"+poll.getTitle()+"' comes.");
+		UserInterface.addMessage("System: Received new poll '"+poll.getTitle()+"'.");
 		
 	}
 	

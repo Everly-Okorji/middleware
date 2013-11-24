@@ -1,9 +1,10 @@
 package classic;
 
+import java.io.Serializable;
 import java.util.List;
 
 
-public class Response {
+public class Response implements Serializable {
 
 	public enum RespType {YES, NO, MAYBE};
 	

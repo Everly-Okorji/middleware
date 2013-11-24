@@ -26,13 +26,14 @@ import javax.swing.JComboBox;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
+
+import classic.Response.RespType;
 
 public class UserInterface extends JPanel
                              implements ActionListener {
@@ -123,9 +124,8 @@ public class UserInterface extends JPanel
         descriptionTextField.setActionCommand(descriptionString);
         descriptionTextField.addActionListener(this);
 
-        //Create the combo box, select item at index 4.
-        //Indices start at 0, so 4 specifies the pig.
-        clientsListSelect = new JComboBox<String>(User.clients);
+        //Add all clients to the options
+        clientsListSelect = new JComboBox<String>(User.other_clients);
         clientsListSelect.setSelectedIndex(0);
       	clientsListSelect.addActionListener(this);
 
@@ -188,35 +188,6 @@ public class UserInterface extends JPanel
       //-------------------------------  
         
         availabilityPane = new JPanel();
-        final GridLayout experimentLayout = new GridLayout(0,4);
-        final JPanel availabilityComponents = new JPanel();
-        availabilityComponents.setLayout(experimentLayout);
-        availabilityComponents.setPreferredSize(new Dimension(250, 100));
-        
-        List<ButtonGroup> groups = new ArrayList<ButtonGroup>();
-        yesRadioButtons = new ArrayList<JRadioButton>();
-        maybeRadioButtons = new ArrayList<JRadioButton>();
-        noRadioButtons = new ArrayList<JRadioButton>();
-        
-        for (int i = 0; i < availability.size(); i++) {
-        	
-        	availabilityComponents.add(new JLabel(availability.get(i)));
-        	yesRadioButtons.add(new JRadioButton());
-        	availabilityComponents.add(yesRadioButtons.get(i));
-        	maybeRadioButtons.add(new JRadioButton());
-        	availabilityComponents.add(maybeRadioButtons.get(i));
-        	noRadioButtons.add(new JRadioButton());
-        	noRadioButtons.get(i).setSelected(true);
-        	availabilityComponents.add(noRadioButtons.get(i));
-        	
-        	groups.add(new ButtonGroup());
-            groups.get(i).add(yesRadioButtons.get(i));
-            groups.get(i).add(maybeRadioButtons.get(i));
-            groups.get(i).add(noRadioButtons.get(i));
-        }
-
-        availabilityPane.add(availabilityComponents, BorderLayout.NORTH);
-        availabilityPane.add(new JSeparator(), BorderLayout.CENTER);
 
       //--------------------------------------- 
         
@@ -299,7 +270,7 @@ public class UserInterface extends JPanel
     		newPollName = titleTextField.getText();
     		recipients = new HashSet<String>();
     		clientsListSelect.removeAllItems();
-    		for (String client: User.clients){
+    		for (String client: User.other_clients){
     			clientsListSelect.addItem(client);
     		}
     		itemsListReset = true;
@@ -329,6 +300,7 @@ public class UserInterface extends JPanel
     	}
     	for (int i = 0; i < size; i++) {
     		String item = clientsListSelect.getItemAt(0);
+    		
     		recipients.add(item);
     		clientsListSelect.removeItemAt(0);
     	}
@@ -337,6 +309,7 @@ public class UserInterface extends JPanel
     
     private void executeSend() {
     	
+    	newPollName = titleTextField.getText();
     	String descr = descriptionTextField.getText();
     	// TODO Error Check for all parameters!
     	
@@ -358,7 +331,7 @@ public class UserInterface extends JPanel
     	titleTextField.setText("");
     	descriptionTextField.setText("");
     	clientsListSelect.removeAllItems();
-    	for (String client: User.clients){
+    	for (String client: User.other_clients){
 			clientsListSelect.addItem(client);
 		}
     	
@@ -369,22 +342,65 @@ public class UserInterface extends JPanel
     	if (pollNameTextField.getText().isEmpty()) {
     		return;
     	}
+    	
     	String poll_name = pollNameTextField.getText();
-    	pollNameTextField.setText("");
+    	
+    	boolean pollFound = false;
+    	List<String> meetTimes = null;
+    	for (Poll p: MyClient.receivedPolls) {
+    		if (poll_name.equals(p.getTitle())) {
+    			pollFound = true;
+    			meetTimes = p.getMeetingTimes();
+    			break;
+    		}
+    	}
+    	
+    	if (!pollFound) {
+    		pollNameTextField.setText("");
+    		addMessage("System: Invalid Poll Name: '" + poll_name + "'!");
+    		return;
+    	}
     	
     	// TODO Get the possible meeting times for the poll, 
     	// or return with an appropriate message.
-    	
-        // TODO REMOVE!
+
+        final GridLayout experimentLayout = new GridLayout(0,4);
+        final JPanel availabilityComponents = new JPanel();
+        availabilityComponents.setLayout(experimentLayout);
+        availabilityComponents.setPreferredSize(new Dimension(250, 100));
+        
+        List<ButtonGroup> groups = new ArrayList<ButtonGroup>();
+        yesRadioButtons = new ArrayList<JRadioButton>();
+        maybeRadioButtons = new ArrayList<JRadioButton>();
+        noRadioButtons = new ArrayList<JRadioButton>();
+        
     	// Load the options
         availability.clear();
-        availability.add("Monday");
-        availability.add("Tuesday");
-        availability.add("Wednesday");
-        availability.add("Thursday");
-        availability.add("Friday");
-        availability.add("Saturday");
-        availability.add("Sunday");
+        for (String time: meetTimes) {
+        	availability.add(time);
+        }
+       
+        for (int i = 0; i < availability.size(); i++) {
+        	
+        	availabilityComponents.add(new JLabel(availability.get(i)));
+        	yesRadioButtons.add(new JRadioButton());
+        	availabilityComponents.add(yesRadioButtons.get(i));
+        	maybeRadioButtons.add(new JRadioButton());
+        	availabilityComponents.add(maybeRadioButtons.get(i));
+        	noRadioButtons.add(new JRadioButton());
+        	noRadioButtons.get(i).setSelected(true);
+        	availabilityComponents.add(noRadioButtons.get(i));
+        	
+        	groups.add(new ButtonGroup());
+            groups.get(i).add(yesRadioButtons.get(i));
+            groups.get(i).add(maybeRadioButtons.get(i));
+            groups.get(i).add(noRadioButtons.get(i));
+        }
+        
+        availabilityPane.removeAll();
+        availabilityPane.add(availabilityComponents, BorderLayout.NORTH);
+        availabilityPane.add(new JSeparator(), BorderLayout.CENTER);
+        
     	availabilityPane.setVisible(true);
     	
     	loadOptionsLabel.setText("Options for: " + poll_name);
@@ -396,8 +412,39 @@ public class UserInterface extends JPanel
     	if (loadOptionsPrompt.equals(loadOptionsLabel.getText())) {
     		return;
     	}
-    	JOptionPane.showMessageDialog(this, "In the Execute Submit method!");
+    	
+    	// We know that the poll name must be valid since it is checked by loadOptions
+    	String poll_name = pollNameTextField.getText();
+    	
+
+    	// Prepare response parameters and create response
+    	List<RespType> responses_list = new ArrayList<RespType>();
+    	int size = yesRadioButtons.size();
+    	
+    	for (int i = 0; i < size; i++) {
+    		if (yesRadioButtons.get(i).isSelected()) {
+    			responses_list.add(RespType.YES);
+    		} else if (maybeRadioButtons.get(i).isSelected()) {
+    			responses_list.add(RespType.MAYBE);
+    		} else {
+    			responses_list.add(RespType.NO);
+    		}
+    	}
+    	
+    	// Check if the size of availability matches the size of the responses
+    	if (responses_list.size() != availability.size()) {
+    		System.err.println("Size of availability did not match size of responses!");
+    		return;
+    	}
+    	
+    	Response resp = new Response(poll_name, User.user, availability, responses_list);
+    	
+    	// Send response
+    	User.client.sendResponse(poll_name, resp);
+    	
+    	addMessage("System: Response was sent for poll name '" + poll_name + "'!");
     	loadOptionsLabel.setText(loadOptionsPrompt);
+    	pollNameTextField.setText("");
     	pollNameTextField.setVisible(true);
     }
     

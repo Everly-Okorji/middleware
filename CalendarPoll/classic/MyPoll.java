@@ -87,5 +87,10 @@ public class MyPoll implements Poll {
 		return members;
 	}
 
+	@Override
+	public List<String> getMeetingTimes() {
+		return this.possible_times;
+	}
+
 	
 }

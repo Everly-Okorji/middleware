@@ -1,6 +1,7 @@
 package classic;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Set;
 
 
@@ -23,5 +24,7 @@ public interface Poll extends Serializable {
 	Status getStatus();
 	
 	Set<String> getMembers();
+	
+	List<String> getMeetingTimes();
 
 }

@@ -1,7 +1,9 @@
 package classic;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.SwingUtilities;
@@ -10,7 +12,11 @@ import javax.swing.UIManager;
 
 public class User {
 
-	static final String[] clients = {"alice", "tom", "everly", "zirui"};
+	// All clients including this user
+	final static String[] ALL_CLIENTS = {"alice", "tom", "everly", "zirui"};
+	
+	// Will hold all clients except this user
+	static String[] other_clients;
 	
 	static String user;
 	static Client client;
@@ -20,7 +26,7 @@ public class User {
 	public static void main(String[] args) throws IOException {
 		
 		// Fetch the clients list
-		List<String> clientsList = Arrays.asList(clients);
+		List<String> clientsList = Arrays.asList(ALL_CLIENTS);
 		
 		// Fetch username
 		user = null;
@@ -46,6 +52,15 @@ public class User {
 			}
 		}
 		
+		// Set the "clients" array before initializing any other components
+		List<String> temp = new ArrayList<String>();
+		for (String c: ALL_CLIENTS) {
+			if (!c.equals(user)) {
+				temp.add(c);
+			}
+		}
+		other_clients = temp.toArray(new String[0]);
+		
 		// Create client object
 		client = new MyClient(user, clientsList);
 		
@@ -59,6 +74,9 @@ public class User {
             }
         });
 		mHandler = new MyMessageHandler();
+		mHandler.receiveMessagesOnMyQueue();
+		
+		// NOTE: The method above has a "while true" loop!
 		
 	}
 
