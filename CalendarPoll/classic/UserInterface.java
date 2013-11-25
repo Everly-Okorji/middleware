@@ -242,7 +242,7 @@ public class UserInterface extends JPanel
      */
     static void createAndShowGUI() {
         //Create and set up the window.
-        JFrame frame = new JFrame("Calendar Poll");
+        JFrame frame = new JFrame(User.user);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         //Add content to the window.
@@ -263,9 +263,17 @@ public class UserInterface extends JPanel
     
     private void executeAdd() {
     	
-    	boolean itemsListReset = false;
+    	// Get currently selected item
+    	String temp = null;
+    	try {
+    		temp = clientsListSelect.getSelectedItem().toString();
+    	} catch (NullPointerException e) {
+    		
+    	}
+    	if (temp == null) temp = "";
     	
-    	// Reset the container and poll name first
+    	boolean itemsListReset = false;
+    	// Reset the container and poll name if poll name was changed
     	if (!newPollName.equals(titleTextField.getText())) {
     		newPollName = titleTextField.getText();
     		recipients = new HashSet<String>();
@@ -289,10 +297,29 @@ public class UserInterface extends JPanel
 			clientsListSelect.removeItem(item);
 			addMessage("System: Added " + item + " to Poll '" + newPollName
 					+ "'");
+		} else {
+			
+			// Check if the initially selected string is in the refreshed list and add it
+			boolean tempIsInNewList = false;
+			for (String s: User.other_clients) {
+				if (s.equals(temp)) {
+					tempIsInNewList = true;
+					break;
+				}
+			}
+			if (tempIsInNewList) {
+				recipients.add(item);
+				clientsListSelect.removeItem(item);
+				addMessage("System: Added " + item + " to Poll '" + newPollName
+						+ "'");
+			}
+			
 		}
     }
     
     private void executeAddAll() {
+
+    	newPollName = titleTextField.getText();
     	
     	int size = clientsListSelect.getItemCount();
     	if (size == 0) {
@@ -320,7 +347,6 @@ public class UserInterface extends JPanel
     	
     	// Send poll
     	User.client.sendPoll(newPollName, recipients);
-    	addMessage("System: Poll '" + newPollName + "' was sent to all specified recipients!");
     	
     	// Reset variables
     	newPollName = "";
@@ -360,9 +386,6 @@ public class UserInterface extends JPanel
     		addMessage("System: Invalid Poll Name: '" + poll_name + "'!");
     		return;
     	}
-    	
-    	// TODO Get the possible meeting times for the poll, 
-    	// or return with an appropriate message.
 
         final GridLayout experimentLayout = new GridLayout(0,4);
         final JPanel availabilityComponents = new JPanel();

@@ -37,7 +37,7 @@ public class MyClient implements Client {
 	
 	static Context ictx=null;
 	QueueConnectionFactory qcf;
-	static Map<String, QueueConnection> openConnections;
+	Map<String, QueueConnection> openConnections;	// Maps a poll to its connection object
 	
 	static List<Poll> receivedPolls=new ArrayList<Poll>();
 	
@@ -95,7 +95,7 @@ public class MyClient implements Client {
 		Poll p=new MyPoll(title, message, name, MyPoll.Status.INITIALIZED, possibleTimes);
 		polls.add(p);
 		
-		UserInterface.addMessage("Poll '"+title+"' created.");
+		UserInterface.addMessage("Poll Created: '"+title+"'");
 	}
 	
 	@Override
@@ -125,42 +125,48 @@ public class MyClient implements Client {
 		//Add members to the poll
 		poll.setMembers(members);
 		
+		poll.setOpen();
+		QueueConnection cnx;
+		QueueSession session = null;
+		TemporaryQueue tempQueue;
+		ObjectMessage msg;
+		
+		// Create the message
+		try {
+			
+			cnx =  qcf.createQueueConnection();
+			session = cnx.createQueueSession(false,
+					Session.AUTO_ACKNOWLEDGE);
+			tempQueue = session.createTemporaryQueue();
+			cnx.start();
+
+			msg = session.createObjectMessage();
+			msg.setObject(poll);
+			msg.setJMSReplyTo(tempQueue);
+			
+		} catch (JMSException e) {
+			System.err.println("JMS Exception found while preparing message for '" + poll.getTitle() + "'.");
+			return;
+		}
+		
+		// Start listening for responses
+		User.mHandler.addNewListener(poll.getTitle(), tempQueue);
+		
+		// Save the connection object
+		openConnections.put(poll.getTitle(), cnx);
 		
 		// Send poll to everyone in the poll list
 		for (String person : User.other_clients) {
 			if (members.contains(person)) { // Person will be receiving message
-
+				QueueSender sender;
 				try {
-					// Get the QueueConnection object, or create one if it does not exist
-					if (!openConnections.containsKey(person)) {
-						QueueConnection conn = qcf.createQueueConnection();
-						openConnections.put(person, conn);
-					}
-					QueueConnection cnx = openConnections.get(person);
-					QueueSession session = cnx.createQueueSession(false,
-							Session.AUTO_ACKNOWLEDGE);
-
-					TemporaryQueue tempQueue = session.createTemporaryQueue();
-					QueueSender sender = session.createSender(map.get(person));
-					cnx.start();
-
-					ObjectMessage msg = session.createObjectMessage();
-					msg.setObject(poll);
-					msg.setJMSReplyTo(tempQueue);
-					
-					
-					User.mHandler.addNewListener(poll.getTitle(), tempQueue);
+					sender = session.createSender(map.get(person));
 					sender.send(msg);
 				} catch (JMSException e) {
-					System.err.println("Message not sent! JMS Exception found.");
-					return;
+					System.err.println("JMS Exception found while trying to send poll '" + poll.getTitle() + "' to " + person + ".");
+					continue;
 				}
-				
-				
-				poll.setOpen();
-
-				UserInterface.addMessage("Poll '"+ title+"' has been sent to person '"+person+"'.");
-
+				UserInterface.addMessage("Poll Sent: '"+ title+"' has been sent to '"+person+"'.");
 			}
 		}
 
@@ -194,7 +200,7 @@ public class MyClient implements Client {
 		
 		poll.addResponse(response);
 		
-		UserInterface.addMessage("Response of poll '"+response.poll_name+"' received from person '"+response.replier+"'.");
+		UserInterface.addMessage("Response Received: Response for '"+response.poll_name+"' received from '"+response.replier+"'.");
 
 	}
 	
@@ -218,29 +224,42 @@ public class MyClient implements Client {
 		}
 		
 		String text=poll_name+finalizedMeetingTime;
-		
-		
 		Set<String> members=poll.getMembers();
+		
+		QueueConnection cnx = openConnections.get(poll_name);
+		QueueSession session;
+		TextMessage msg;
+		QueueSender sender;
+		
+		try {
+			session = cnx.createQueueSession(false,
+					Session.AUTO_ACKNOWLEDGE);
+			msg = session.createTextMessage();
+			msg.setText(text);
+		} catch (JMSException e1) {
+			System.out.println("JMS Exception found while preparing finalized time message for '" + poll_name + "'");
+			return;
+		}
+		
 		for (String member:members){
 			try {
 				//TODO new session created, will there be any conflicts with the earlier created session to send poll?
-				QueueConnection cnx = openConnections.get(member);
-				QueueSession session = cnx.createQueueSession(false,
-						Session.AUTO_ACKNOWLEDGE);
-				TextMessage msg = session.createTextMessage();
-				msg.setText(text);
-				QueueSender sender;
 				sender = session.createSender(map.get(member));
 				sender.send(msg);
-				UserInterface.addMessage("Final meeting time of poll'"+poll_name+"' has been sent to person '"+member+"'.");
+				UserInterface.addMessage("System: Final meeting time of poll'"+poll_name+"' has been sent to '"+member+"'.");
 			} catch (JMSException e) {
-				System.err.println("Final meeting time not sent! JMS Exception found.");
-				return;
+				System.err.println("Final meeting time not sent to " + member + "! JMS Exception found.");
 			}
 			
 		}
 		
-		UserInterface.addMessage("Poll '"+poll_name+"' has been closed");
+		try {
+			cnx.close();
+		} catch (JMSException e) {
+			System.out.println("JMS Exception found while attempting to close the connection object for '" + poll_name + "'");
+			return;
+		}
+		UserInterface.addMessage("System: Poll '"+poll_name+"' has been closed.");
 		
 	}
 	

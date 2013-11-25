@@ -71,7 +71,10 @@ public class MyMessageHandler implements MessageHandler {
 			return;
 		}
 		if (listeners.containsKey(poll_name)) {
-			System.err.println("MH: Poll name '" + poll_name + "' already has an existing message listener associated with it!");
+			for (String poll: listeners.keySet()) {
+				System.out.println("In listeners: " + poll);
+			}
+			System.err.println("MH: Poll name '" + poll_name + "' already has an existing temporary queue associated with it!");
 			return;
 		}
 		
@@ -103,6 +106,7 @@ public class MyMessageHandler implements MessageHandler {
 	// Listens on the queue dedicated to this user
 	@Override
 	public void receiveMessagesOnMyQueue() {
+		
 		try {
 			ictx = new InitialContext();
 			Queue queue = (Queue) ictx.lookup(User.user);
@@ -177,6 +181,16 @@ public class MyMessageHandler implements MessageHandler {
 	
 	// Waiting to receive poll responses
 	private void receiveResponses(final String poll_name) {
+		
+		if (listenThreads.containsKey(poll_name)) {
+			System.out.println("A listener already exists for '" + poll_name + "'!");
+			return;
+		}
+		
+		if (!listeners.containsKey(poll_name)) {
+			System.out.println("You are not listening for responses for '" + poll_name + "'!");
+			return;
+		}
 		
 		Thread listen_thread = new Thread(new Runnable() {
 			@Override
