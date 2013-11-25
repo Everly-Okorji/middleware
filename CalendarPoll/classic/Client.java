@@ -65,4 +65,6 @@ public interface Client {
 	void sendResponse(String poll_name, Response response);
 	
 	QueueSession getSession(String poll_name);
+	
+	List<Poll> getPolls();
 }

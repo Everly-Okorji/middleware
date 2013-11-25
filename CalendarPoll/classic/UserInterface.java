@@ -48,6 +48,7 @@ public class UserInterface extends JPanel
     protected static final String addAvailabilityButtonString = "Add This Availability";
     protected static final String addButtonString = "Add";
     protected static final String sendButtonString = "Send";
+    protected static final String finalizePollButtonString = "Finalize A Poll";
     
     protected static final String loadOptionsPrompt = "Enter Poll Name: ";
     protected static final String loadOptionsString = "Load Options";
@@ -146,6 +147,8 @@ public class UserInterface extends JPanel
       	addButton.addActionListener(this);
       	JButton sendButton = new JButton(sendButtonString);
       	sendButton.addActionListener(this);
+      	JButton finalizePollButton = new JButton(finalizePollButtonString);
+      	finalizePollButton.addActionListener(this);
       	
         //Create some labels for the fields.
         JLabel titleLabel = new JLabel(titleString + ": ");
@@ -177,6 +180,7 @@ public class UserInterface extends JPanel
         textControlsPane.add(addAllButton);
         textControlsPane.add(addButton);
         textControlsPane.add(sendButton);
+        textControlsPane.add(finalizePollButton);
 
         return textControlsPane;
     }
@@ -223,7 +227,8 @@ public class UserInterface extends JPanel
        
         return responsePane;
     }
-
+    
+    @Override
     public void actionPerformed(ActionEvent e) {
     	
     	if (addAvailabilityButtonString.equals(e.getActionCommand())) {
@@ -239,9 +244,12 @@ public class UserInterface extends JPanel
         } else if (submitString.equals(e.getActionCommand())) {
         	availabilityPane.setVisible(false);
         	executeSubmit();
+        } else if (finalizePollButtonString.equals(e.getActionCommand())) {
+        	executeFinalizePoll();
         }
         
     }
+
 
 	private JEditorPane createEditorPane() {
         JEditorPane editorPane = new JEditorPane();
@@ -527,5 +535,49 @@ public class UserInterface extends JPanel
     	pollNameTextField.setVisible(true);
     }
     
+	private void executeFinalizePoll() {
+		String poll_name = JOptionPane.showInputDialog("Enter poll name: ");
+		
+		if (poll_name == null) {
+			JOptionPane.showMessageDialog(this, "Poll not finalized!");
+			return;
+		}
+		
+		List<Poll> polls = User.client.getPolls();
+		boolean pollFound = false;
+		Poll poll = null;
+		
+		for (Poll p: polls) {
+			if (p.getTitle().equals(poll_name)) {
+				pollFound = true;
+				poll = p;
+				break;
+			}
+		}
+		
+		if (pollFound) {
+			
+			// Print messages to screen
+			addMessage("Responses for " + poll_name);
+			for (Response r: poll.getResponses()) {
+				addMessage(r.replier + " said: ");
+				for (int i = 0; i < r.possible_times.size(); i++) {
+					addMessage(r.possible_times.get(i) + ": " + r.responses.get(i).toString());
+				}
+				addMessage("");
+			}
+				
+			// Get finalized time
+			String finalizedTime = JOptionPane.showInputDialog("Responses for this poll have been displayed on the messages block. Enter a finalized time for the meeting: ");
+			if (finalizedTime == null) {
+				JOptionPane.showMessageDialog(this, "Dialog closed. Poll '" + poll_name + "' not finalized!");
+				return;
+			}
+			
+			User.client.closePoll(poll_name, finalizedTime);
+			JOptionPane.showMessageDialog(this, "Poll '" + poll_name + "' has been finalized with meting time '" + finalizedTime + "'!");
+		}
+		
+	}
 }
 

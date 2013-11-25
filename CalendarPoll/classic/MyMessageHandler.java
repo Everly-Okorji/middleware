@@ -274,7 +274,7 @@ public class MyMessageHandler implements MessageHandler {
 				Poll poll = polls.take();
 				System.out.println("MH: New Poll received! Poll name is '"
 						+ poll.getTitle() + "'.");
-				User.client.receivePoll(poll);;
+				User.client.receivePoll(poll);
 
 			} catch (InterruptedException e) {
 				System.err

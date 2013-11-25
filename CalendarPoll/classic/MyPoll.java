@@ -26,15 +26,10 @@ public class MyPoll implements Poll {
 		this.members=new HashSet<String>();
 		this.responses = new ArrayList<Response>();
 	}
-
-	@Override
-	public void addAMember(String member) {
-		this.members.add(member);		
-	}
 	
 	@Override
 	public void setMembers(Set<String> members) {
-		this.members=members;		
+		this.members.addAll(members);		
 	}
 
 	@Override
@@ -90,6 +85,11 @@ public class MyPoll implements Poll {
 	@Override
 	public List<String> getMeetingTimes() {
 		return this.possible_times;
+	}
+
+	@Override
+	public List<Response> getResponses() {
+		return responses;
 	}
 
 	

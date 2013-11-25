@@ -37,6 +37,7 @@ public class MyClient implements Client {
 	
 	static Context ictx=null;
 	QueueConnectionFactory qcf;
+	
 	Map<String, QueueConnection> openConnections;	// Maps a poll to its connection object
 	Map<String, QueueSession> openSessions;
 	
@@ -196,10 +197,16 @@ public class MyClient implements Client {
 		}
 		
 		//Check if the poll status is Poll.Status.OPEN before accepting responses
-		if (poll.getStatus()!=Poll.Status.OPEN){
-			System.err.println("The poll '"+response.poll_name+"' is not open.");
-			return;
-		}
+		
+			if (poll.getStatus() == Poll.Status.INITIALIZED) {
+				System.err.println("The poll '"+response.poll_name+"' is still in INITIALIZED status.");
+				return;
+			}
+			if (poll.getStatus() == Poll.Status.FINALIZED) {
+				System.err.println("The poll '"+response.poll_name+"' has already been finalized.");
+				return;
+			}	
+		
 		
 		poll.addResponse(response);
 		
@@ -212,6 +219,7 @@ public class MyClient implements Client {
 		boolean pollfound=false;
 		Poll poll=null;
 		
+		// Fetch the poll
 		for (Poll pIterator: polls){
 			if (pIterator.getTitle().equals(poll_name)) {
 				poll=pIterator;
@@ -221,12 +229,12 @@ public class MyClient implements Client {
 		}
 		if (pollfound==false){
 			System.err.println("There is no such poll titled:"+poll_name+".");
-		}
-		else{
-			poll.setFinalized();
+			return;
 		}
 		
-		String text=poll_name+finalizedMeetingTime;
+		poll.setFinalized();
+		
+		String text= User.user + " selected " + finalizedMeetingTime + " as the finalized meeting time for Poll '" + poll_name + "'.";
 		Set<String> members=poll.getMembers();
 		
 		QueueConnection cnx = openConnections.get(poll_name);
@@ -330,6 +338,11 @@ public class MyClient implements Client {
 		} else {
 			return null;
 		}
+	}
+
+	@Override
+	public List<Poll> getPolls() {
+		return polls;
 	}
 	
 }
