@@ -3,6 +3,8 @@ package classic;
 import java.util.List;
 import java.util.Set;
 
+import javax.jms.QueueSession;
+
 import classic.Response.RespType;
 
 
@@ -61,4 +63,6 @@ public interface Client {
 	 * @param response
 	 */
 	void sendResponse(String poll_name, Response response);
+	
+	QueueSession getSession(String poll_name);
 }

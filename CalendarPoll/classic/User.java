@@ -31,7 +31,7 @@ public class User {
 		// Fetch username
 		user = null;
 		while (user == null) {
-			System.out.print("Please enter a name: ");
+			System.out.print("Please enter a registered name: ");
 			
 			char ch = (char) System.in.read();
 			user = "";

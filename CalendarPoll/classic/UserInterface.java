@@ -26,6 +26,7 @@ import javax.swing.JComboBox;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -40,9 +41,11 @@ public class UserInterface extends JPanel
 	
     protected static final String titleString = "Title";
     protected static final String descriptionString = "Description";
+    protected static final String availabilityString = "Availability";
     protected static final String addMemberString = "AddMember";
     
     protected static final String addAllButtonString = "Add All";
+    protected static final String addAvailabilityButtonString = "Add This Availability";
     protected static final String addButtonString = "Add";
     protected static final String sendButtonString = "Send";
     
@@ -50,7 +53,7 @@ public class UserInterface extends JPanel
     protected static final String loadOptionsString = "Load Options";
     protected static final String submitString = "Submit";
     
-    JTextField titleTextField, descriptionTextField, pollNameTextField;
+    JTextField titleTextField, descriptionTextField, availabilityTextField, pollNameTextField;
     
     JLabel loadOptionsLabel;
     JPanel availabilityPane;
@@ -124,12 +127,19 @@ public class UserInterface extends JPanel
         descriptionTextField.setActionCommand(descriptionString);
         descriptionTextField.addActionListener(this);
 
+        //Create a regular text field.
+       	availabilityTextField = new JTextField(20);
+        availabilityTextField.setActionCommand(availabilityString);
+        availabilityTextField.addActionListener(this);
+        
         //Add all clients to the options
         clientsListSelect = new JComboBox<String>(User.other_clients);
         clientsListSelect.setSelectedIndex(0);
       	clientsListSelect.addActionListener(this);
 
-      	// Create 3 buttons
+      	// Create buttons
+      	JButton addAvailabilityButton = new JButton(addAvailabilityButtonString);
+      	addAvailabilityButton.addActionListener(this);
       	JButton addAllButton = new JButton(addAllButtonString);
       	addAllButton.addActionListener(this);
       	JButton addButton = new JButton(addButtonString);
@@ -161,6 +171,8 @@ public class UserInterface extends JPanel
         textControlsPane.add(titleTextField);
         textControlsPane.add(descriptionLabel);
         textControlsPane.add(descriptionTextField);
+        textControlsPane.add(availabilityTextField);
+        textControlsPane.add(addAvailabilityButton);
         textControlsPane.add(clientsListSelect);
         textControlsPane.add(addAllButton);
         textControlsPane.add(addButton);
@@ -214,7 +226,9 @@ public class UserInterface extends JPanel
 
     public void actionPerformed(ActionEvent e) {
     	
-        if (addButtonString.equals(e.getActionCommand())) {
+    	if (addAvailabilityButtonString.equals(e.getActionCommand())) {
+        	executeAddAvailability();
+        } else if (addButtonString.equals(e.getActionCommand())) {
         	executeAdd();
         } else if (addAllButtonString.equals(e.getActionCommand())) {
         	executeAddAll();
@@ -229,7 +243,7 @@ public class UserInterface extends JPanel
         
     }
 
-    private JEditorPane createEditorPane() {
+	private JEditorPane createEditorPane() {
         JEditorPane editorPane = new JEditorPane();
         editorPane.setEditable(false);
         return editorPane;
@@ -261,7 +275,35 @@ public class UserInterface extends JPanel
     	editorPane.setText(editorPane.getText() + message + "\n");
     }
     
+    
+    /*********************** PRIVATE FUNCTIONS ******************************/
+    
+    
+    
+    private void executeAddAvailability() {
+    	
+    	if (titleTextField.getText().isEmpty()) {
+    		JOptionPane.showMessageDialog(this, "Please enter a title first!");
+    		return;
+    	}
+    	
+		String availability = availabilityTextField.getText();
+		
+		if (availability.isEmpty()) {
+			JOptionPane.showMessageDialog(this, "Please enter an availability!");
+    		return;
+		}
+		
+		possibleTimes.add(availability);
+		availabilityTextField.setText("");
+	}
+    
     private void executeAdd() {
+    	
+    	if (titleTextField.getText().isEmpty()) {
+    		JOptionPane.showMessageDialog(this, "Please enter a title first!");
+    		return;
+    	}
     	
     	// Get currently selected item
     	String temp = null;
@@ -319,6 +361,11 @@ public class UserInterface extends JPanel
     
     private void executeAddAll() {
 
+    	if (titleTextField.getText().isEmpty()) {
+    		JOptionPane.showMessageDialog(this, "Please enter a title first!");
+    		return;
+    	}
+    	
     	newPollName = titleTextField.getText();
     	
     	int size = clientsListSelect.getItemCount();
@@ -336,9 +383,18 @@ public class UserInterface extends JPanel
     
     private void executeSend() {
     	
+    	// Error checking
+    	if (titleTextField.getText().isEmpty()) {
+    		JOptionPane.showMessageDialog(this, "Please enter a title first!");
+    		return;
+    	}
+    	if (recipients.isEmpty()) {
+    		JOptionPane.showMessageDialog(this, "Please add a recipient!");
+    		return;
+    	}
+    	
     	newPollName = titleTextField.getText();
     	String descr = descriptionTextField.getText();
-    	// TODO Error Check for all parameters!
     	
     	// Create poll
     	List<String> myPossibleTimes = new ArrayList<String>();

@@ -38,6 +38,7 @@ public class MyClient implements Client {
 	static Context ictx=null;
 	QueueConnectionFactory qcf;
 	Map<String, QueueConnection> openConnections;	// Maps a poll to its connection object
+	Map<String, QueueSession> openSessions;
 	
 	static List<Poll> receivedPolls=new ArrayList<Poll>();
 	
@@ -46,6 +47,7 @@ public class MyClient implements Client {
 		this.clientList=clientList;
 		this.polls=new ArrayList<Poll>();
 		this.openConnections = new HashMap<String, QueueConnection>();
+		this.openSessions = new HashMap<String, QueueSession>();
 		
 		// Create a queue for each registered name
 		map = new HashMap<String, Queue>();
@@ -154,6 +156,7 @@ public class MyClient implements Client {
 		
 		// Save the connection object
 		openConnections.put(poll.getTitle(), cnx);
+		openSessions.put(poll.getTitle(), session);
 		
 		// Send poll to everyone in the poll list
 		for (String person : User.other_clients) {
@@ -314,6 +317,19 @@ public class MyClient implements Client {
 		}
 		
 		User.mHandler.sendResponse(poll_name, response);
+	}
+
+	@Override
+	public QueueSession getSession(String poll_name) {
+		if (poll_name == null) {
+			return null;
+		}
+		
+		if (openSessions.containsKey(poll_name)) {
+			return openSessions.get(poll_name);
+		} else {
+			return null;
+		}
 	}
 	
 }

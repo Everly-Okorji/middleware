@@ -197,7 +197,7 @@ public class MyMessageHandler implements MessageHandler {
 			public void run() {
 				if (listeners.containsKey(poll_name)) {
 					try {
-						ictx = new InitialContext();
+					/*	ictx = new InitialContext();
 						// Queue queue = (Queue) ictx.lookup("queue");
 						QueueConnectionFactory qcf = (QueueConnectionFactory) ictx
 								.lookup("qcf");
@@ -206,10 +206,23 @@ public class MyMessageHandler implements MessageHandler {
 						QueueConnection cnx = qcf.createQueueConnection();
 						QueueSession session = cnx.createQueueSession(false,
 								Session.AUTO_ACKNOWLEDGE);
+						*/
+						QueueSession session = User.client.getSession(poll_name);
+						
+						if (session == null) {
+							System.err.println("Cannot listen for responses to '" + poll_name + "' because the session associated with this poll is null.");
+							return;
+						}
+						
+						TemporaryQueue tempQueue = listeners.get(poll_name);
+						
+						if (tempQueue == null) {
+							System.err.println("Cannot listen for responses to '" + poll_name + "' because the temporary queue associated with this poll is null.");
+							return;
+						}
+						
 						QueueReceiver receiver = session
-								.createReceiver(listeners.get(poll_name));
-
-						cnx.start();
+								.createReceiver(tempQueue);
 
 						while (true) {
 							Message msg = receiver.receive();
@@ -218,11 +231,8 @@ public class MyMessageHandler implements MessageHandler {
 							responses.add(resp);
 						}
 						
-					} catch (NamingException e) {
-						System.err.println("MH: Naming exception found while attempting to listen for poll '" + poll_name + "'!");
 					} catch (JMSException e) {
-						System.err.println("MH: JMS exception found while attempting to listen for poll '" + poll_name + "'!");
-						e.printStackTrace();
+						System.err.println("MH: JMS exception found while attempting to listen for poll '" + poll_name + "'. Perhaps the poll has been closed!");
 					}
 				} else {
 					System.err
