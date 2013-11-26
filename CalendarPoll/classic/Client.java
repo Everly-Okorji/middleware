@@ -10,7 +10,7 @@ import classic.Response.RespType;
 
 public interface Client {
 
-	/*--------------------REQUESTER-------------------*/
+	/*--------------------AS A REQUESTER-------------------*/
 	
 	/**
 	 *  Creates a poll object
@@ -21,14 +21,14 @@ public interface Client {
 	void createPoll(String title, String message, List<String> possibleTimes);
 	
 	/**
-	 * Sends poll to members
+	 * Send poll to members
 	 * @param title
 	 * @param members
 	 */
 	void sendPoll(String title, Set<String> members);
 	
 	/**
-	 * Updates poll based on response
+	 * Update poll based on response
 	 * @param response
 	 */
 	void UpdatePollInfo(Response response);
@@ -40,10 +40,10 @@ public interface Client {
 	 */
 	void closePoll(String poll_name, String finalizedMeetingTime);
 	
-	/*------------------ REPLIER ---------------------*/
+	/*------------------AS A REPLIER ---------------------*/
 	
 	/**
-	 * Receives an open poll (created by another client) from the message handler
+	 * Receive an open poll (created by another client) from the message handler
 	 *  and stores it somewhere
 	 * @param poll
 	 */
@@ -64,7 +64,16 @@ public interface Client {
 	 */
 	void sendResponse(String poll_name, Response response);
 	
+	/**
+	 * Pass the session corresponding to the poll_name to the messageHandler to send back response
+	 * @param poll_name
+	 * @return session
+	 */
 	QueueSession getSession(String poll_name);
 	
+	/**
+	 * Send the polls created by the clients
+	 * @return a list of polls
+	 */
 	List<Poll> getPolls();
 }
