@@ -105,6 +105,7 @@ public class MyMessageHandler implements MessageHandler {
 		// Remove the stopped thread and deleted queue from the map
 		listenThreads.remove(poll_name);
 		listeners.remove(poll_name);
+		
 	}
 	
 	// Listens on the queue dedicated to this user

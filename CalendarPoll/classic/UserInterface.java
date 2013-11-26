@@ -585,15 +585,14 @@ public class UserInterface extends JPanel
 			// Print messages to screen
 			addMessage("Responses for " + poll_name);
 			for (Response r: poll.getResponses()) {
-				addMessage(r.replier + " said: ");
+				addMessage("Recipient " + r.replier + " said: ");
 				for (int i = 0; i < r.possible_times.size(); i++) {
-					addMessage(r.possible_times.get(i) + ": " + r.responses.get(i).toString());
+					addMessage(r.possible_times.get(i) + " -> " + r.responses.get(i).toString());
 				}
-				addMessage("");
 			}
 				
 			// Get finalized time
-			String finalizedTime = JOptionPane.showInputDialog("Responses for this poll have been displayed on the messages block. Enter a finalized time for the meeting: ");
+			String finalizedTime = JOptionPane.showInputDialog("All responses are displayed in the message pane. Please enter selected time: ");
 			if (finalizedTime == null) {
 				JOptionPane.showMessageDialog(this, "Dialog closed. Poll '" + poll_name + "' not finalized!");
 				return;

@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
@@ -41,23 +42,14 @@ public class User {
 		// Fetch username
 		user = null;
 		while (user == null) {
-			System.out.print("Please enter a registered name: ");
-			
-			char ch = (char) System.in.read();
-			user = "";
-			
-			while (ch != '\n') {
-				user += ch;
-				ch = (char) System.in.read();
+			user = JOptionPane.showInputDialog("Please enter a registered name: ");
+			// Terminate the application if the user closes the dialog box
+			if (user == null) {
+				System.exit(0);
 			}
-			// Remove appended newline character
-			if (!user.isEmpty()) {
-				user = user.substring(0, user.length()-1);
-			}
-			
 			user = user.toLowerCase();
 			if (!clientsList.contains(user.toLowerCase())) {
-				System.err.println(user + " is not a registered name!");
+				JOptionPane.showMessageDialog(null, user + " is not a registered name!");
 				user = null;
 			}
 		}
