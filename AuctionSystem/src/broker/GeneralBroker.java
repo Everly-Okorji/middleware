@@ -37,6 +37,8 @@ public class GeneralBroker {
 	// From Seller to Broker
 	public void publishAvailableItem(long sellerId, long itemId, String name,
 			String attributes, float minimumBid) {
+		
+		System.out.println("Received seller item from Seller " + sellerId);
 
 		// Add item to list
 		Set<String> attr = new HashSet<String>(Arrays.asList(attributes.split(",")));
@@ -61,6 +63,8 @@ public class GeneralBroker {
 	// From Broker to Parent Broker. Broker ID is the id of the broker who sent this item to me
 	public void broadcastItem(long brokerId, long sellerId, long itemId, String name,
 			String attributes, float minimumBid) {
+		
+		System.out.println("Received seller item from Broker " + brokerId);
 		
 		// Add item to list of items from children brokers
 		Set<String> attr = new HashSet<String>(Arrays.asList(attributes.split(",")));
@@ -93,6 +97,7 @@ public class GeneralBroker {
 	public void publishBid(long buyerId, long itemId, float price) {
 
 		// itemIdToPort.put(itemId, port);
+		System.out.println("Received buyer bid from Buyer " + buyerId);
 
 		String bidMsg = "E#Publish Bid#Buyer" + buyerId + "#" + itemId + "#" + price;
 
@@ -143,6 +148,8 @@ public class GeneralBroker {
 
 	
 	public void publishBidUpdate(long brokerId, long sellerId, long buyerId, long itemId, float price) {
+		
+		System.out.println("Received seller bid update from Seller " + sellerId + " or Broker " + brokerId);
 		
 		// E#Publish Bid#[Buyer ID]#[Item ID]#[Price]
 		String bidUpdateMsgToBuyer = "D#Subscribe Receive Bid#" + buyerId + "#" + itemId + "#" + price;
@@ -227,6 +234,8 @@ public class GeneralBroker {
 	public void publishFinalizeSale(long brokerId, long sellerId,  long buyerId, long itemId,
 			float finalPrice) {
 		
+		System.out.println("Received finalize sale instruction from Seller " + sellerId + " or Broker " + brokerId);
+		
 		boolean saleFinalized = false;
 		Item currentItem = null;
 		
@@ -294,6 +303,9 @@ public class GeneralBroker {
 	
 	public void subscribeInterest(long buyerId, String name, String attributes,
 			float minimumBid) {
+		
+		System.out.println("Received buyer interest from Buyer " + buyerId + " on item with name " + name);
+		
 		List<Item> matches = matchString(name);
 		
 		Set<String> attr = new HashSet<String>(
@@ -319,6 +331,8 @@ public class GeneralBroker {
 	}
 
 	public void subscribeInterestBidUpdate(long buyerId, long itemId) {
+		
+		System.out.println("Received request from Seller " + buyerId + " to receive updates on item " + itemId);
 		
 		for (Item item: localItems) {
 			if (Long.valueOf(itemId).equals(Long.valueOf(item.itemId))) {

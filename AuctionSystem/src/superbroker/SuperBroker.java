@@ -9,7 +9,7 @@ import java.net.Socket;
 
 
 public class SuperBroker {
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) {
 		
 		//The structure table of the broker-client network
 		//                port  parent    children   [A 0 means no such port]
@@ -33,7 +33,7 @@ public class SuperBroker {
 		
 		int portForBrokers = 2001;	//Keep track of current next available port number for Broker
 		int portForClients = 2010;	//Keep track of current next available port number for Client
-		int portOfSuperBroker = 2000; //The port number for the Super Broker
+		final int portOfSuperBroker = 2000; //The port number for the Super Broker
 		int currentPortForBroker=portForBrokers;
 		int currentPortForClient=portForClients;
 		String inputLine;
@@ -54,7 +54,7 @@ public class SuperBroker {
 	            		//Check if the port number for Broker beyond its range
 	            		if (portForBrokers > 2006){
 							System.err.println("SuperBroker: There's no more port availble for Broker!");
-							System.exit(1);
+							break;
 						}
 	            		out.println(portForBrokers);
 						currentPortForBroker=portForBrokers;
@@ -108,7 +108,7 @@ public class SuperBroker {
 								break;
 							}
 						}
-					}
+					} else break;
 	            	inputLine = in.readLine();
 	            }
 	           
@@ -116,6 +116,9 @@ public class SuperBroker {
 	            in.close();
 				clientSocket.close();
 			}
+		} catch (IOException e) {
+			System.out.println("I/O Exception caught at SuperBroker. System will shut down now.");
+			System.exit(0);
 		}
 		
 	}

@@ -258,6 +258,7 @@ public class MyClient implements Client {
 		
 		//Generate a notification message to inform all involved members in the poll
 		String text= "System: " + User.user + " selected " + finalizedMeetingTime + " as the finalized meeting time for Poll " + poll_name + ".";
+
 		Set<String> members=poll.getMembers();
 		
 		QueueConnection cnx = openConnections.get(poll_name); //Retrieve the connection for the poll
