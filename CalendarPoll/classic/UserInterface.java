@@ -43,7 +43,7 @@ public class UserInterface extends JPanel
     protected static final String addMemberString = "AddMember";
     
     protected static final String addAllButtonString = "Add All";
-    protected static final String addAvailabilityButtonString = "Add This Availability";
+    protected static final String addAvailabilityButtonString = "Add This Meeting Time";
     protected static final String addButtonString = "Add";
     protected static final String sendButtonString = "Send";
     protected static final String finalizePollButtonString = "Finalize A Poll";
@@ -313,8 +313,16 @@ public class UserInterface extends JPanel
     		return;
 		}
 		
+		// Reset all variables if the name was changed
+		if (!newPollName.equals(titleTextField.getText())) {
+			refreshTempValues();
+		}
+		
 		possibleTimes.add(availability);
 		availabilityTextField.setText("");
+		
+		// Notify User
+		addMessage("System: New meeting time '" + availability + "' was added to Poll '" + newPollName + "'.");
 	}
     
     private void executeAdd() {
@@ -337,12 +345,7 @@ public class UserInterface extends JPanel
     	boolean itemsListReset = false;
     	// Reset the container and poll name if poll name was changed
     	if (!newPollName.equals(titleTextField.getText())) {
-    		newPollName = titleTextField.getText();
-    		recipients = new HashSet<String>();
-    		clientsListSelect.removeAllItems();
-    		for (String client: User.other_clients){
-    			clientsListSelect.addItem(client);
-    		}
+    		refreshTempValues();
     		itemsListReset = true;
     	}
     	
@@ -388,7 +391,11 @@ public class UserInterface extends JPanel
     		return;
     	}
     	
-    	newPollName = titleTextField.getText();
+    	// If name was changed, refresh clients list
+    	if (!newPollName.equals(titleTextField.getText())) {
+    		refreshTempValues();
+    	}
+    	
     	// Ensure that the clients list is not empty
     	int size = clientsListSelect.getItemCount();
     	if (size == 0) {
@@ -407,17 +414,27 @@ public class UserInterface extends JPanel
     
     private void executeSend() {
     	
-    	// Error checking for title and recipients list
+    	// Error checking for title
     	if (titleTextField.getText().isEmpty()) {
     		JOptionPane.showMessageDialog(this, "Please enter a title first!");
     		return;
     	}
+    	
+    	// Refresh values if needed
+    	if (!newPollName.equals(titleTextField.getText())) {
+    		refreshTempValues();
+    	}
+    	
+    	// Check if recipients exist
     	if (recipients.isEmpty()) {
     		JOptionPane.showMessageDialog(this, "Please add a recipient!");
+    		clientsListSelect.removeAllItems();
+    		for (String client: User.other_clients){
+    			clientsListSelect.addItem(client);
+    		}
     		return;
     	}
     	
-    	newPollName = titleTextField.getText();
     	String descr = descriptionTextField.getText();
     	
     	// Create poll
@@ -610,5 +627,18 @@ public class UserInterface extends JPanel
 		}
 		
 	}
+	
+	private void refreshTempValues() {
+		// Reset all UI values
+		newPollName = titleTextField.getText();
+		recipients.clear();
+		possibleTimes.clear();
+		clientsListSelect.removeAllItems();
+		for (String client : User.other_clients) {
+			clientsListSelect.addItem(client);
+		}
+		
+	}
+	
 }
 

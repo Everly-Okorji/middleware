@@ -48,8 +48,12 @@ public class User {
 				System.exit(0);
 			}
 			user = user.toLowerCase();
-			if (!clientsList.contains(user.toLowerCase())) {
-				JOptionPane.showMessageDialog(null, user + " is not a registered name!");
+			if (!clientsList.contains(user)) {
+				if (user.isEmpty()) {
+					JOptionPane.showMessageDialog(null, "Please enter a name!");
+				} else {
+					JOptionPane.showMessageDialog(null, user + " is not a registered name!");
+				}
 				user = null;
 			}
 		}
