@@ -168,9 +168,6 @@ public class MyClient implements Client {
 			return;
 		}
 		
-		// Start listening for responses
-		User.mHandler.addNewListener(poll.getTitle(), tempQueue);
-		
 		// Save the connection object
 		// And save the session object
 		openConnections.put(poll.getTitle(), cnx);
@@ -191,6 +188,9 @@ public class MyClient implements Client {
 				UserInterface.addMessage("Poll Sent: '"+ title+"' has been sent to '"+person+"'.");
 			}
 		}
+		
+		// Start listening for responses
+		User.mHandler.addNewListener(poll.getTitle(), tempQueue);
 
 	}
 	
@@ -229,7 +229,7 @@ public class MyClient implements Client {
 		//Add the response to the poll
 		poll.addResponse(response);
 		
-		UserInterface.addMessage("Response Received: Response for '"+response.poll_name+"' received from '"+response.replier+"'.");
+		UserInterface.addMessage("Response Received: Response for "+response.poll_name+" received from '"+response.replier+"'.");
 
 	}
 	
@@ -257,7 +257,7 @@ public class MyClient implements Client {
 		poll.setFinalized();
 		
 		//Generate a notification message to inform all involved members in the poll
-		String text= "System: " + User.user + " selected " + finalizedMeetingTime + " as the finalized meeting time for Poll " + poll_name + ".";
+		String text= "System: " + User.user + " selected '" + finalizedMeetingTime + "' as the finalized meeting time for Poll '" + poll_name + "'.";
 
 		Set<String> members=poll.getMembers();
 		

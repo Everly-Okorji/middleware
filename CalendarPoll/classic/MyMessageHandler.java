@@ -192,13 +192,13 @@ public class MyMessageHandler implements MessageHandler {
 		
 		// You must not already be listening for responses for this queue
 		if (listenThreads.containsKey(poll_name)) {
-			System.out.println("A listener already exists for '" + poll_name + "'!");
+			System.err.println("MH: A listener already exists for '" + poll_name + "'!");
 			return;
 		}
 		
 		// There must be a listener for this poll
 		if (!listeners.containsKey(poll_name)) {
-			System.out.println("You are not listening for responses for '" + poll_name + "'!");
+			System.err.println("MH: You are not listening for responses for '" + poll_name + "'!");
 			return;
 		}
 		
@@ -211,14 +211,14 @@ public class MyMessageHandler implements MessageHandler {
 						// Fetch session which was used to send message from the client
 						QueueSession session = User.client.getSession(poll_name);
 						if (session == null) {
-							System.err.println("Cannot listen for responses to '" + poll_name + "' because the session associated with this poll is null.");
+							System.err.println("MH: Cannot listen for responses to '" + poll_name + "' because the session associated with this poll is null.");
 							return;
 						}
 						
 						// Fetch temporary queue associated with poll
 						TemporaryQueue tempQueue = listeners.get(poll_name);
 						if (tempQueue == null) {
-							System.err.println("Cannot listen for responses to '" + poll_name + "' because the temporary queue associated with this poll is null.");
+							System.err.println("MH: Cannot listen for responses to '" + poll_name + "' because the temporary queue associated with this poll is null.");
 							return;
 						}
 						

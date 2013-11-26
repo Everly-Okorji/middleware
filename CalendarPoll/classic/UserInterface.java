@@ -575,7 +575,7 @@ public class UserInterface extends JPanel
     	// Send response
     	User.client.sendResponse(poll_name, resp);
     	
-    	addMessage("System: Response was sent for poll name '" + poll_name + "'!");
+    	addMessage("System: Response was sent for poll name '" + poll_name + "'. Note that if this poll had already been finalized, your response will be lost!");
     	loadOptionsLabel.setText(loadOptionsPrompt);
     	pollNameTextField.setText("");
     	pollNameTextField.setVisible(true);
@@ -588,6 +588,10 @@ public class UserInterface extends JPanel
 		
 		if (poll_name == null) {
 			JOptionPane.showMessageDialog(this, "Poll not finalized!");
+			return;
+		}
+		if (poll_name.isEmpty()) {
+			JOptionPane.showMessageDialog(this, "Please enter a poll name to finalize!");
 			return;
 		}
 		
@@ -605,6 +609,11 @@ public class UserInterface extends JPanel
 		}
 		
 		if (pollFound) {
+			
+			if (poll.getStatus() != Poll.Status.OPEN) {
+				JOptionPane.showMessageDialog(this, "Poll is not currently open! It may have already been finalized, or not yet opened.");
+				return;
+			}
 			
 			// Print messages to screen
 			addMessage("Responses for " + poll_name);
@@ -624,6 +633,8 @@ public class UserInterface extends JPanel
 			
 			User.client.closePoll(poll_name, finalizedTime);
 			JOptionPane.showMessageDialog(this, "Poll '" + poll_name + "' has been finalized with meting time '" + finalizedTime + "'!");
+		} else {
+			JOptionPane.showMessageDialog(this, "The poll '" + poll_name + "' which you requested was not found!");
 		}
 		
 	}
