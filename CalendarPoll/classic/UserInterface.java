@@ -234,6 +234,12 @@ public class UserInterface extends JPanel
     @Override
     public void actionPerformed(ActionEvent e) {
     	
+    	// If poll name is changed, reset collections
+    	if (!newPollName.equals(titleTextField.getText())) {
+    		recipients.clear();
+    		possibleTimes.clear();
+    	}
+    	
     	// Call the appropriate method based on what action was caught
     	if (addAvailabilityButtonString.equals(e.getActionCommand())) {
         	executeAddAvailability();
@@ -348,6 +354,7 @@ public class UserInterface extends JPanel
     		return;
     	}
     	
+    	// If clients list was not reset, add the fetched item to recipients
 		if (!itemsListReset) {
 			recipients.add(item);
 			clientsListSelect.removeItem(item);
@@ -364,9 +371,9 @@ public class UserInterface extends JPanel
 				}
 			}
 			if (tempIsInNewList) {
-				recipients.add(item);
-				clientsListSelect.removeItem(item);
-				addMessage("System: Added recipient " + item + " to Poll '" + newPollName
+				recipients.add(temp);
+				clientsListSelect.removeItem(temp);
+				addMessage("System: Added recipient " + temp + " to Poll '" + newPollName
 						+ "'");
 			}
 			
