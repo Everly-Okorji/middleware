@@ -1,5 +1,4 @@
 package classic;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -34,6 +33,8 @@ public class MyMessageHandler implements MessageHandler {
 	BlockingQueue<Poll> polls;
 	
 	MyMessageHandler() {
+		
+		// Initialize variables
 		listeners = new HashMap<String, TemporaryQueue>();
 		listenThreads = new HashMap<String, Thread>();
 		
@@ -62,6 +63,7 @@ public class MyMessageHandler implements MessageHandler {
 
 	@Override
 	public void addNewListener(String poll_name, TemporaryQueue tempQueue) {
+		
 		if (poll_name == null) {
 			System.err.println("MH: Poll name for listener is null!");
 			return;
@@ -70,6 +72,7 @@ public class MyMessageHandler implements MessageHandler {
 			System.err.println("MH: Temporary queue to be added to poll '" + poll_name + "' is null!");
 			return;
 		}
+		// Check if we're already listening for that poll name
 		if (listeners.containsKey(poll_name)) {
 			for (String poll: listeners.keySet()) {
 				System.out.println("In listeners: " + poll);
@@ -85,12 +88,13 @@ public class MyMessageHandler implements MessageHandler {
 	
 	@Override
 	public void stopListening(String poll_name) throws JMSException {
-		if (!listeners.containsKey(poll_name)) {
-			System.out.println("MH: Poll name does not have an associated temporary queue!");
+		
+		if (poll_name == null) {
+			System.out.println("MH: Poll name is null!");
 			return;
 		}
 		if (!listeners.containsKey(poll_name)) {
-			System.out.println("MH: Poll name has not started listening to its message queue!");
+			System.out.println("MH: Poll '" + poll_name + "' does not have an associated temporary queue!");
 			return;
 		}
 		
@@ -107,10 +111,10 @@ public class MyMessageHandler implements MessageHandler {
 	@Override
 	public void receiveMessagesOnMyQueue() {
 		
+		// Set up JMS to receive message
 		try {
 			ictx = new InitialContext();
 			Queue queue = (Queue) ictx.lookup(User.user);
-			System.out.println("JMS Queue was fetched for name '" + User.user + "'!");
 			QueueConnectionFactory qcf = (QueueConnectionFactory) ictx
 					.lookup("qcf");
 			ictx.close();
@@ -122,6 +126,7 @@ public class MyMessageHandler implements MessageHandler {
 
 			cnx.start();
 
+			// Constantly wait for new messages and handle them appropriately
 			while (true) {
 				Message msg = receiver.receive();
 				if (msg instanceof TextMessage) {
@@ -132,14 +137,14 @@ public class MyMessageHandler implements MessageHandler {
 					replierQueues.put(p.getTitle(), (TemporaryQueue) msg.getJMSReplyTo());
 				} else {
 					System.err
-							.println("MH: Could not interpret the received message!");
+							.println("MH: Could not interpret the received message: "+ msg.toString() + "!");
 				}
 			}
 
 		} catch (NamingException e) {
-			System.out.println("MH: Naming exception found while attempting to receive messages!");
+			System.err.println("MH: Naming exception found while attempting to receive messages!");
 		} catch (JMSException e) {
-			System.out.println("MH: JMS exception found while attempting to receive messages!");
+			System.err.println("MH: JMS exception found while attempting to receive messages!");
 		}
 	 
 	}
@@ -148,13 +153,15 @@ public class MyMessageHandler implements MessageHandler {
 	@Override
 	public void sendResponse(String poll_name, Response response) {
 		
+		// Fetch the temporary queue to send response to
 		TemporaryQueue queue = replierQueues.get(poll_name);
-		
+		// Check if queue is null
 		if (queue == null) {
 			System.err.println("MH: Poll name '" + poll_name + "' is not associated with a temporary queue for sending response!");
 			return;
 		}
 		
+		// Send response
 		try {
 		
 		 	ictx = new InitialContext();
@@ -182,48 +189,41 @@ public class MyMessageHandler implements MessageHandler {
 	// Waiting to receive poll responses
 	private void receiveResponses(final String poll_name) {
 		
+		// You must not already be listening for responses for this queue
 		if (listenThreads.containsKey(poll_name)) {
 			System.out.println("A listener already exists for '" + poll_name + "'!");
 			return;
 		}
 		
+		// There must be a listener for this poll
 		if (!listeners.containsKey(poll_name)) {
 			System.out.println("You are not listening for responses for '" + poll_name + "'!");
 			return;
 		}
 		
+		// Create thread for listening
 		Thread listen_thread = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				if (listeners.containsKey(poll_name)) {
 					try {
-					/*	ictx = new InitialContext();
-						// Queue queue = (Queue) ictx.lookup("queue");
-						QueueConnectionFactory qcf = (QueueConnectionFactory) ictx
-								.lookup("qcf");
-						ictx.close();
-
-						QueueConnection cnx = qcf.createQueueConnection();
-						QueueSession session = cnx.createQueueSession(false,
-								Session.AUTO_ACKNOWLEDGE);
-						*/
+						// Fetch session which was used to send message from the client
 						QueueSession session = User.client.getSession(poll_name);
-						
 						if (session == null) {
 							System.err.println("Cannot listen for responses to '" + poll_name + "' because the session associated with this poll is null.");
 							return;
 						}
 						
+						// Fetch temporary queue associated with poll
 						TemporaryQueue tempQueue = listeners.get(poll_name);
-						
 						if (tempQueue == null) {
 							System.err.println("Cannot listen for responses to '" + poll_name + "' because the temporary queue associated with this poll is null.");
 							return;
 						}
 						
+						// Listen for responses
 						QueueReceiver receiver = session
 								.createReceiver(tempQueue);
-
 						while (true) {
 							Message msg = receiver.receive();
 							Response resp = (Response) ((ObjectMessage) msg)

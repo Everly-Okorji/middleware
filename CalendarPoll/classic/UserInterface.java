@@ -1,18 +1,10 @@
 package classic;
- 
 
-/*
- * TextSamplerDemo.java requires the following files:
- *   TextSamplerDemoHelp.html (which references images/dukeWaveRed.gif)
- *   images/Pig.gif
- *   images/sound.gif
- */
-
-import java.awt.BorderLayout;              //for layout managers and more
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;        //for action events
+import java.awt.event.ActionListener; 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +28,12 @@ import javax.swing.JTextField;
 
 import classic.Response.RespType;
 
+/**
+ * This class handles the display elements of the user's view. It receives input from
+ * the end user and relays the information to the appropriate function in the client.
+ * @author Everly
+ *
+ */
 public class UserInterface extends JPanel
                              implements ActionListener {
 	
@@ -75,17 +73,19 @@ public class UserInterface extends JPanel
 
     public UserInterface() {
     	
+    	// Initialize collections and variables
     	recipients = new HashSet<String>();
     	possibleTimes = new HashSet<String>();
     	newPollName = "";
-    	
+ 
     	availability = new ArrayList<String>();
     	
         setLayout(new BorderLayout());
 
+        // Create top-right view
         JPanel textControlsPane = createTextControlsPane();
 
-        //Create an editor pane.
+        //Create an editor pane for left-side view of display window
         editorPane = createEditorPane();
         JScrollPane messagePane = new JScrollPane(editorPane);
         messagePane.setVerticalScrollBarPolicy(
@@ -97,7 +97,7 @@ public class UserInterface extends JPanel
                         BorderFactory.createTitledBorder("Messages"),
                         BorderFactory.createEmptyBorder(5,5,5,5)));
 
-        // Create response panel
+        // Create response panel for right-side view of display window
         JPanel responsePane = createResponsePane();
         
         //Put the editor pane and the text pane in a split pane.
@@ -113,6 +113,7 @@ public class UserInterface extends JPanel
                                 BorderFactory.createTitledBorder("User Inputs"),
                                 BorderFactory.createEmptyBorder(5,5,5,5)));
 
+        // Add panels to window
         add(messagePane, BorderLayout.LINE_START);
         add(inputsPane, BorderLayout.LINE_END);
     }
@@ -170,6 +171,7 @@ public class UserInterface extends JPanel
                                 BorderFactory.createTitledBorder("Poll"),
                                 BorderFactory.createEmptyBorder(5,5,5,5)));
         
+        // Add components to the panel
         textControlsPane.add(titleLabel);
         textControlsPane.add(titleTextField);
         textControlsPane.add(descriptionLabel);
@@ -192,6 +194,7 @@ public class UserInterface extends JPanel
         pollNameTextField.setActionCommand(loadOptionsString);
         pollNameTextField.addActionListener(this);
 
+        // Create buttons and listen on them
       	JButton loadOptionsButton = new JButton(loadOptionsString);
       	loadOptionsButton.addActionListener(this);
       	JButton submitButton = new JButton(submitString);
@@ -231,6 +234,7 @@ public class UserInterface extends JPanel
     @Override
     public void actionPerformed(ActionEvent e) {
     	
+    	// Call the appropriate method based on what action was caught
     	if (addAvailabilityButtonString.equals(e.getActionCommand())) {
         	executeAddAvailability();
         } else if (addButtonString.equals(e.getActionCommand())) {
@@ -258,7 +262,7 @@ public class UserInterface extends JPanel
     }
 
     /**
-     * Create the GUI and show it.  For thread safety,
+     * Create the GUI and show it. For thread safety,
      * this method should be invoked from the
      * event dispatch thread.
      */
@@ -290,13 +294,14 @@ public class UserInterface extends JPanel
     
     private void executeAddAvailability() {
     	
+    	// Check for empty title
     	if (titleTextField.getText().isEmpty()) {
     		JOptionPane.showMessageDialog(this, "Please enter a title first!");
     		return;
     	}
     	
 		String availability = availabilityTextField.getText();
-		
+		// Check to see if user entered text
 		if (availability.isEmpty()) {
 			JOptionPane.showMessageDialog(this, "Please enter an availability!");
     		return;
@@ -308,6 +313,7 @@ public class UserInterface extends JPanel
     
     private void executeAdd() {
     	
+    	// Check for empty title
     	if (titleTextField.getText().isEmpty()) {
     		JOptionPane.showMessageDialog(this, "Please enter a title first!");
     		return;
@@ -360,7 +366,7 @@ public class UserInterface extends JPanel
 			if (tempIsInNewList) {
 				recipients.add(item);
 				clientsListSelect.removeItem(item);
-				addMessage("System: Added " + item + " to Poll '" + newPollName
+				addMessage("System: Added recipient " + item + " to Poll '" + newPollName
 						+ "'");
 			}
 			
@@ -369,29 +375,32 @@ public class UserInterface extends JPanel
     
     private void executeAddAll() {
 
+    	// Check for empty title
     	if (titleTextField.getText().isEmpty()) {
     		JOptionPane.showMessageDialog(this, "Please enter a title first!");
     		return;
     	}
     	
     	newPollName = titleTextField.getText();
-    	
+    	// Ensure that the clients list is not empty
     	int size = clientsListSelect.getItemCount();
     	if (size == 0) {
     		return;
     	}
+    	
+    	// Add all items
     	for (int i = 0; i < size; i++) {
     		String item = clientsListSelect.getItemAt(0);
-    		
     		recipients.add(item);
     		clientsListSelect.removeItemAt(0);
+    		addMessage("System: Added recipient " + item + " to Poll '" + newPollName + "'");
     	}
-    	addMessage("System: " + "Added all recipients to Poll '" + newPollName + "'");
+  
     }
     
     private void executeSend() {
     	
-    	// Error checking
+    	// Error checking for title and recipients list
     	if (titleTextField.getText().isEmpty()) {
     		JOptionPane.showMessageDialog(this, "Please enter a title first!");
     		return;
@@ -429,12 +438,14 @@ public class UserInterface extends JPanel
     
     private void executeLoadOptions() {
     	
+    	// Check for empty poll name field
     	if (pollNameTextField.getText().isEmpty()) {
     		return;
     	}
     	
     	String poll_name = pollNameTextField.getText();
     	
+    	// Find the poll whose response we need to fetch
     	boolean pollFound = false;
     	List<String> meetTimes = null;
     	for (Poll p: MyClient.receivedPolls) {
@@ -445,12 +456,14 @@ public class UserInterface extends JPanel
     		}
     	}
     	
+    	// If poll not found, reset text field and return
     	if (!pollFound) {
     		pollNameTextField.setText("");
     		addMessage("System: Invalid Poll Name: '" + poll_name + "'!");
     		return;
     	}
 
+    	// Create view for the options
         final GridLayout experimentLayout = new GridLayout(0,4);
         final JPanel availabilityComponents = new JPanel();
         availabilityComponents.setLayout(experimentLayout);
@@ -467,6 +480,13 @@ public class UserInterface extends JPanel
         	availability.add(time);
         }
        
+        // Add labels for headers
+        availabilityComponents.add(new JLabel("Meeting Time"));
+        availabilityComponents.add(new JLabel("YES"));
+        availabilityComponents.add(new JLabel("MAYBE"));
+        availabilityComponents.add(new JLabel("NO"));
+        
+        // Add all meeting times and options
         for (int i = 0; i < availability.size(); i++) {
         	
         	availabilityComponents.add(new JLabel(availability.get(i)));
@@ -484,6 +504,7 @@ public class UserInterface extends JPanel
             groups.get(i).add(noRadioButtons.get(i));
         }
         
+        // reset the view to the latest version
         availabilityPane.removeAll();
         availabilityPane.add(availabilityComponents, BorderLayout.NORTH);
         availabilityPane.add(new JSeparator(), BorderLayout.CENTER);
@@ -496,6 +517,7 @@ public class UserInterface extends JPanel
     
     private void executeSubmit() {
     	
+    	// Check to see if we have loaded options
     	if (loadOptionsPrompt.equals(loadOptionsLabel.getText())) {
     		return;
     	}
@@ -536,6 +558,8 @@ public class UserInterface extends JPanel
     }
     
 	private void executeFinalizePoll() {
+		
+		// Fetch poll name from user
 		String poll_name = JOptionPane.showInputDialog("Enter poll name: ");
 		
 		if (poll_name == null) {
@@ -543,6 +567,7 @@ public class UserInterface extends JPanel
 			return;
 		}
 		
+		// Find the specified poll
 		List<Poll> polls = User.client.getPolls();
 		boolean pollFound = false;
 		Poll poll = null;

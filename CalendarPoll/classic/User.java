@@ -9,7 +9,12 @@ import java.util.List;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-
+/**
+ * This class contains the main method. This is where the client, message handler and
+ * user interface objects are declared and initialized.
+ * @author Everly
+ *
+ */
 public class User {
 
 	// All clients including this user
@@ -23,6 +28,11 @@ public class User {
 	static MessageHandler mHandler;
 	static UserInterface ui;
 	
+	/**
+	 * This method gets the user's name, and sets up a client view for the user 
+	 * @param args
+	 * @throws IOException
+	 */
 	public static void main(String[] args) throws IOException {
 		
 		// Fetch the clients list
@@ -40,11 +50,11 @@ public class User {
 				user += ch;
 				ch = (char) System.in.read();
 			}
+			// Remove appended newline character
 			if (!user.isEmpty()) {
 				user = user.substring(0, user.length()-1);
 			}
 			
-			System.out.println(user);
 			user = user.toLowerCase();
 			if (!clientsList.contains(user.toLowerCase())) {
 				System.err.println(user + " is not a registered name!");
@@ -52,7 +62,7 @@ public class User {
 			}
 		}
 		
-		// Set the "clients" array before initializing any other components
+		// Set the "other_clients" array before initializing any other components
 		List<String> temp = new ArrayList<String>();
 		for (String c: ALL_CLIENTS) {
 			if (!c.equals(user)) {
