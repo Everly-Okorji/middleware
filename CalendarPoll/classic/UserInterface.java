@@ -483,7 +483,7 @@ public class UserInterface extends JPanel
     	// If poll not found, reset text field and return
     	if (!pollFound) {
     		pollNameTextField.setText("");
-    		addMessage("System: Invalid Poll Name: '" + poll_name + "'!");
+    		JOptionPane.showMessageDialog(this, "System: Invalid Poll Name: '" + poll_name + "'!");
     		return;
     	}
 
